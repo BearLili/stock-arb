@@ -1,0 +1,14 @@
+node_modules/
+dist/
+data/live/
+data/synth_live/
+logs/
+*.log
+alerts.csv
+run-state.db
+run-state.db-*
+.DS_Store
+# 密钥/环境：排除 .env 及其变体，但保留模板 .env.example
+.env
+.env.*
+!.env.example

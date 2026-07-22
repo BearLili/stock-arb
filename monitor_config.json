@@ -1,0 +1,68 @@
+{
+  "_说明": "taker费率bp/边: Gate永续与MEXC永续来自API实测(2026-07-22), 其余为VIP0公开费率; MEXC永续0为促销费率会变; hlperp含tradeXYZ builder分成为估计值,实盘前需用小单核实",
+  "taker_fee_bp": {
+    "bstocks": 10, "gstocks": 20, "xstocks": 20, "bybitx": 20, "okxx": 10,
+    "mexcon": 5, "bnperp": 5, "gateperp": 7.5, "mexcperp": 0, "hlperp": 7
+  },
+  "_maker说明": "maker费率bp/边(追加字段, 原文件仅含taker): 来自PRD §3.1与fees_api.json(2026-07-22). bnperp/gateperp/mexcperp/bstocks/hlperp有明确maker; gate返佣-1; 未标注maker的产品回退=taker(保守). maker_min_profit_bp为纸面/回测maker口径最低利润项(threshold_maker=max(2×(makerA+makerB),0)+min_profit)",
+  "maker_fee_bp": {
+    "bstocks": 0, "gstocks": 20, "xstocks": 20, "bybitx": 20, "okxx": 10,
+    "mexcon": 5, "bnperp": 2, "gateperp": -1, "mexcperp": 0, "hlperp": 1.5
+  },
+  "maker_min_profit_bp": 2,
+  "edge_threshold_bp": 3,
+  "dev_threshold_bp": 15,
+  "_engine说明": "M1 引擎参数(追加字段): spike_filter_bp=单tick相对上一被接受mid的跳变阈值(bp),超过需 spike_confirm_ticks 连续确认才接受(去尖刺); ewma_alpha=EWMA基线每tick权重; baseline_window_min=滚动中位窗口(min); rolling_median_min_samples=滚动中位最少样本; stale_ms=腿陈旧丢弃阈值; alert_cooldown_ms=同对同类告警最小间隔",
+  "engine": {
+    "spike_filter_bp": 100,
+    "spike_confirm_ticks": 3,
+    "ewma_alpha": 0.001,
+    "baseline_window_min": 240,
+    "rolling_median_min_samples": 60,
+    "stale_ms": 10000,
+    "alert_cooldown_ms": 2000,
+    "mexc_edge_stale_ms": 2000
+  },
+  "funding_poll": {
+    "interval_sec": 300,
+    "settle_per_day": { "bnperp": 3, "gateperp": 3, "mexcperp": 3, "hlperp": 24 }
+  },
+  "_tradeable说明": "撮合层是否允许作交易腿(追加字段)。mexcon=false(PRD §3.4 仅观察,点差100bp级),防策略误用;缺省视为 true",
+  "tradeable": {
+    "bstocks": true, "gstocks": true, "xstocks": true, "bybitx": true, "okxx": true,
+    "mexcon": false, "bnperp": true, "gateperp": true, "mexcperp": true, "hlperp": true
+  },
+  "_rtt说明": "下单往返到达交易所的估计延迟(ms,追加字段)。本地占位值,服务器部署后实测替换,进 M2 撮合的滞后校正;缺省 100ms",
+  "rtt_ms": {
+    "bnperp": 50, "gateperp": 50, "bstocks": 50, "gstocks": 50, "xstocks": 50,
+    "bybitx": 50, "okxx": 50, "hlperp": 50, "mexcperp": 300, "mexcon": 300
+  },
+  "paper": {
+    "taker_slippage_bp": 1,
+    "entry_cost_mult": 1.0,
+    "exit_band_bp": 2,
+    "maker_timeout_ms": 60000,
+    "max_hold_min": 240,
+    "min_trading_days_for_m3": 5
+  },
+  "alert_csv": "alerts.csv",
+  "funding_note": "持仓对需叠加资金费差(近7天日均%): SNDK bn .073/gate .096/mexc .073/hl .062; MU bn .037/gate .037/hl .051; CRCL bn .026/gate .022/mexc .026/hl .050",
+  "pairs": [
+    ["bnperp", "mexcperp"],
+    ["gateperp", "mexcperp"],
+    ["bnperp", "gateperp"],
+    ["bnperp", "hlperp"],
+    ["gateperp", "hlperp"],
+    ["okxx", "bnperp"],
+    ["bybitx", "xstocks"],
+    ["mexcon", "bnperp"],
+    ["bstocks", "bnperp"]
+  ],
+  "symbols": {
+    "TSLA":  {"bnperp": "TSLAUSDT", "gateperp": "TSLAX_USDT", "hlperp": "xyz:TSLA", "bstocks": "TSLABUSDT", "gstocks": "TSLAG_USDT", "xstocks": "TSLAX_USDT", "bybitx": "TSLAXUSDT", "okxx": "XTSLA-USDT", "mexcon": "TSLAONUSDT"},
+    "NVDA":  {"bnperp": "NVDAUSDT", "gateperp": "NVDAX_USDT", "hlperp": "xyz:NVDA", "bstocks": "NVDABUSDT", "gstocks": "NVDAG_USDT", "xstocks": "NVDAX_USDT", "bybitx": "NVDAXUSDT", "okxx": "XNVDA-USDT", "mexcon": "NVDAONUSDT"},
+    "MU":    {"bnperp": "MUUSDT", "gateperp": "MU_USDT", "hlperp": "xyz:MU", "bstocks": "MUBUSDT", "gstocks": "MUG_USDT", "okxx": "XMU-USDT", "mexcon": "MUONUSDT"},
+    "SNDK":  {"bnperp": "SNDKUSDT", "gateperp": "SNDK_USDT", "hlperp": "xyz:SNDK", "bstocks": "SNDKBUSDT", "gstocks": "SNDKG_USDT", "okxx": "XSNDK-USDT", "mexcon": "SNDKONUSDT", "mexcperp": "SNDKSTOCK_USDT"},
+    "CRCL":  {"bnperp": "CRCLUSDT", "gateperp": "CRCLX_USDT", "hlperp": "xyz:CRCL", "bstocks": "CRCLBUSDT", "gstocks": "CRCLG_USDT", "xstocks": "CRCLX_USDT", "bybitx": "CRCLXUSDT", "okxx": "XCRCL-USDT", "mexcon": "CRCLONUSDT", "mexcperp": "CRCLSTOCK_USDT"}
+  }
+}

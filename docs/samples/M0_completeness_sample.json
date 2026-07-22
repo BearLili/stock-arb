@@ -1,0 +1,171 @@
+{
+  "runStartedTs": 1784708902523,
+  "reportTs": 1784708938363,
+  "windowMinutes": 1,
+  "feeds": [
+    {
+      "name": "BN-FUT",
+      "status": "disconnected",
+      "messages": 7640,
+      "ticksAccepted": 7640,
+      "ticksRejected": 0,
+      "reconnects": 0,
+      "uptimePct": 95.72,
+      "tickCoverageMinutes": 1,
+      "tickCoverageExpectedMinutes": 1,
+      "tickCoveragePct": 100,
+      "skew": {
+        "n": 5000,
+        "medianMs": -32,
+        "p95Ms": 37,
+        "maxMs": 108
+      }
+    },
+    {
+      "name": "BN-SPOT",
+      "status": "disconnected",
+      "messages": 6929,
+      "ticksAccepted": 6929,
+      "ticksRejected": 0,
+      "reconnects": 0,
+      "uptimePct": 95.88,
+      "tickCoverageMinutes": 1,
+      "tickCoverageExpectedMinutes": 1,
+      "tickCoveragePct": 100,
+      "skew": {
+        "n": 0,
+        "medianMs": null,
+        "p95Ms": null,
+        "maxMs": null
+      }
+    },
+    {
+      "name": "GATE-FUT",
+      "status": "disconnected",
+      "messages": 1992,
+      "ticksAccepted": 1989,
+      "ticksRejected": 0,
+      "reconnects": 0,
+      "uptimePct": 95.41,
+      "tickCoverageMinutes": 1,
+      "tickCoverageExpectedMinutes": 1,
+      "tickCoveragePct": 100,
+      "skew": {
+        "n": 1989,
+        "medianMs": -28,
+        "p95Ms": 34,
+        "maxMs": 104
+      }
+    },
+    {
+      "name": "GATE-SPOT",
+      "status": "disconnected",
+      "messages": 408,
+      "ticksAccepted": 405,
+      "ticksRejected": 0,
+      "reconnects": 0,
+      "uptimePct": 94.68,
+      "tickCoverageMinutes": 1,
+      "tickCoverageExpectedMinutes": 1,
+      "tickCoveragePct": 100,
+      "skew": {
+        "n": 405,
+        "medianMs": -35,
+        "p95Ms": 12,
+        "maxMs": 101
+      }
+    },
+    {
+      "name": "BYBIT",
+      "status": "disconnected",
+      "messages": 67,
+      "ticksAccepted": 65,
+      "ticksRejected": 0,
+      "reconnects": 0,
+      "uptimePct": 94.5,
+      "tickCoverageMinutes": 1,
+      "tickCoverageExpectedMinutes": 1,
+      "tickCoveragePct": 100,
+      "skew": {
+        "n": 65,
+        "medianMs": -2,
+        "p95Ms": 92,
+        "maxMs": 1610
+      }
+    },
+    {
+      "name": "OKX",
+      "status": "disconnected",
+      "messages": 499,
+      "ticksAccepted": 493,
+      "ticksRejected": 0,
+      "reconnects": 0,
+      "uptimePct": 94.73,
+      "tickCoverageMinutes": 1,
+      "tickCoverageExpectedMinutes": 1,
+      "tickCoveragePct": 100,
+      "skew": {
+        "n": 493,
+        "medianMs": -6,
+        "p95Ms": 62,
+        "maxMs": 130
+      }
+    },
+    {
+      "name": "MEXC-FUT",
+      "status": "disconnected",
+      "messages": 30,
+      "ticksAccepted": 26,
+      "ticksRejected": 0,
+      "reconnects": 0,
+      "uptimePct": 95.24,
+      "tickCoverageMinutes": 1,
+      "tickCoverageExpectedMinutes": 1,
+      "tickCoveragePct": 100,
+      "skew": {
+        "n": 26,
+        "medianMs": 1430,
+        "p95Ms": 3035,
+        "maxMs": 3096
+      }
+    },
+    {
+      "name": "MEXC-SPOT",
+      "status": "disconnected",
+      "messages": 80,
+      "ticksAccepted": 80,
+      "ticksRejected": 0,
+      "reconnects": 0,
+      "uptimePct": 97.64,
+      "tickCoverageMinutes": 1,
+      "tickCoverageExpectedMinutes": 1,
+      "tickCoveragePct": 100,
+      "skew": {
+        "n": 0,
+        "medianMs": null,
+        "p95Ms": null,
+        "maxMs": null
+      }
+    },
+    {
+      "name": "HL",
+      "status": "disconnected",
+      "messages": 46,
+      "ticksAccepted": 40,
+      "ticksRejected": 0,
+      "reconnects": 0,
+      "uptimePct": 95.73,
+      "tickCoverageMinutes": 1,
+      "tickCoverageExpectedMinutes": 1,
+      "tickCoveragePct": 100,
+      "skew": {
+        "n": 40,
+        "medianMs": 270,
+        "p95Ms": 673,
+        "maxMs": 673
+      }
+    }
+  ],
+  "overallUptimePct": 95.5,
+  "overallTickCoveragePct": 100
+}

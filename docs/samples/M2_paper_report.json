@@ -1,0 +1,5 @@
+{
+  "sufficient": false,
+  "reason": "无 tick 落盘数据",
+  "note": "服务器采集回流后重跑"
+}

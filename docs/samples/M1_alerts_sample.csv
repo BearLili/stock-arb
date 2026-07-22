@@ -1,0 +1,14 @@
+ts,sym,pair,kind,side,edge_bp,dev_bp,baseline,carry_bp_day
+1784709837,SNDK,bnperp-mexcperp,EDGE,卖mexcperp买bnperp,3.8,-7.7,ewma,0.00
+1784709872,CRCL,bnperp-mexcperp,EDGE,卖mexcperp买bnperp,5.1,-10.5,ewma,0.00
+1784709872,CRCL,gateperp-mexcperp,EDGE,卖mexcperp买gateperp,5.5,-7.5,ewma,3.00
+1784709874,CRCL,bnperp-mexcperp,EDGE,卖mexcperp买bnperp,6.6,-9.8,ewma,0.00
+1784709874,CRCL,gateperp-mexcperp,EDGE,卖mexcperp买gateperp,8.4,-7.6,ewma,3.00
+1784709875,TSLA,mexcon-bnperp,EDGE,卖mexcon买bnperp,3.5,0.6,ewma,
+1784709878,TSLA,mexcon-bnperp,EDGE,卖mexcon买bnperp,3.7,0.8,ewma,
+1784709880,TSLA,mexcon-bnperp,EDGE,卖mexcon买bnperp,3.7,0.8,ewma,
+1784709882,TSLA,mexcon-bnperp,EDGE,卖mexcon买bnperp,3.7,0.8,ewma,
+1784709884,TSLA,mexcon-bnperp,EDGE,卖mexcon买bnperp,3.7,0.7,ewma,
+1784709887,TSLA,mexcon-bnperp,EDGE,卖mexcon买bnperp,3.7,0.7,ewma,
+1784709889,TSLA,mexcon-bnperp,EDGE,卖mexcon买bnperp,3.7,0.7,ewma,
+1784709892,TSLA,mexcon-bnperp,EDGE,卖mexcon买bnperp,3.7,0.7,ewma,
