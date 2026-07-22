@@ -7,15 +7,9 @@
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { Config } from '../src/config.js';
 import { Replay } from '../src/paper/replay.js';
-import { NetEdgeEngine } from '../src/engine/netEdge.js';
-import { silentSink } from '../src/engine/alerts.js';
-import { buildStrategies } from '../src/paper/strategies.js';
-import { runBook, type CarryFn } from '../src/paper/portfolio.js';
-import { summarize, m3Verdicts, tradingDaysCalendar, type StratModeSummary } from '../src/paper/report.js';
-import type { TradeSignal } from '../src/paper/types.js';
-import { utcDateKey } from '../src/time.js';
-
-const STRATS = ['S1', 'S2'];
+import { FundingHistory } from '../src/paper/fundingHistory.js';
+import { runPaperPipeline } from '../src/paper/run.js';
+import { summarize, m3Verdicts, funnel, type StratModeSummary } from '../src/paper/report.js';
 
 function main(): void {
   const cfg = Config.load(process.env.CONFIG ?? 'monitor_config.json');
@@ -29,43 +23,21 @@ function main(): void {
     process.exit(0);
   }
 
-  // 引擎以 replay 时钟驱动（now=当前事件 ts_recv），onEval 路由到策略收集信号
-  const strategies = buildStrategies(cfg);
-  const signals: TradeSignal[] = [];
-  let clock = 0;
-  const engine = new NetEdgeEngine({
-    cfg,
-    alerts: silentSink,
-    now: () => clock,
-    onEval: (ev) => {
-      for (const s of strategies) signals.push(...s.onEval(ev));
-    },
-  });
-  for (const e of replay.events) {
-    clock = e.tsRecv;
-    engine.onBbo(e);
-  }
+  // carry / S3 决策都用资金费历史(minute_data_v3 的 per-sym funding，%/settle)
+  const fh = FundingHistory.fromMinuteData(process.env.FUNDING ?? 'data/minute_data_v3.json');
+  const res = runPaperPipeline(cfg, replay, fh);
+  const { strats: STRATS, naiveTrades, correctedTrades, tradingDays } = res;
 
-  // carry：本期未接资金费历史 → 记 0（S2 basis+carry 的 carry 待接入 FundingPoller 快照/历史）
-  const carry: CarryFn = () => null;
-
-  const naive = runBook(signals, replay, cfg, 'naive', carry);
-  const corrected = runBook(signals, replay, cfg, 'corrected', carry);
-
-  const days = new Set(replay.events.map((e) => utcDateKey(e.tsRecv)));
-  const minTs = replay.events[0]!.tsRecv;
-  const maxTs = replay.events[replay.events.length - 1]!.tsRecv;
-  const tradingDays = tradingDaysCalendar(minTs, maxTs);
   const summaries: StratModeSummary[] = [];
   for (const s of STRATS) {
-    summaries.push(summarize(s, 'naive', naive.trades, tradingDays));
-    summaries.push(summarize(s, 'corrected', corrected.trades, tradingDays));
+    summaries.push(summarize(s, 'naive', naiveTrades, tradingDays));
+    summaries.push(summarize(s, 'corrected', correctedTrades, tradingDays));
   }
-  const verdicts = m3Verdicts(cfg, STRATS, naive.trades, corrected.trades, tradingDays);
+  const verdicts = m3Verdicts(cfg, STRATS, naiveTrades, correctedTrades, tradingDays);
 
   // ---- 控制台 ----
   console.log('===== M2 纸面撮合报告 =====');
-  console.log(`落盘覆盖：${days.size} 个 UTC 日（其中交易日 ${tradingDays.length}），${replay.events.length} 条 tick，${signals.length} 条开/平信号`);
+  console.log(`落盘覆盖：${res.utcDays} 个 UTC 日（其中交易日 ${tradingDays.length}），${res.ticks} 条 tick，${res.signals} 条开/平信号`);
   console.log('\n[未校正 vs 校正后] 每策略汇总:');
   console.table(
     summaries.map((s) => ({
@@ -83,21 +55,59 @@ function main(): void {
   );
   for (const v of verdicts) if (v.makerWarning) console.log(v.makerWarning);
 
+  // S3 回本天数 = 现货一次性费(bp) / 永续日化 carry(bp/天)（PRD §3.3 口径）
+  const s3variants = [
+    { name: 'S3bn', spot: 'bstocks', perp: 'bnperp' },
+    { name: 'S3gate', spot: 'gstocks', perp: 'gateperp' },
+  ] as const;
+  const paybackRows: Array<Record<string, unknown>> = [];
+  for (const v of s3variants) {
+    for (const sym of ['SNDK', 'CRCL', 'MU']) {
+      const spotFee = cfg.takerFeeBp(v.spot);
+      const dc = fh.dailyBp(sym, v.perp);
+      paybackRows.push({
+        变体: v.name, sym, 现货费bp: spotFee,
+        日carry_bp: dc === null ? 'n/a' : dc.toFixed(2),
+        回本天数: dc !== null && dc > 0 ? (spotFee / dc).toFixed(1) : 'n/a',
+      });
+    }
+  }
+  console.log('\n[S3 回本天数] 现货一次性费 / 永续日化carry（越小越快回本）:');
+  console.table(paybackRows);
+
+  // S2 意图→成交漏斗（maker 未穿越流失分解）
+  const s2Funnel = funnel('S2', 'corrected', correctedTrades);
+  const fpct = (n: number): string => (s2Funnel.total ? ((n / s2Funnel.total) * 100).toFixed(1) : '0');
+  console.log('\n[S2 意图→成交漏斗] 非成交全部源于 maker 对侧价超时(maker_timeout_ms)未穿越挂价:');
+  console.table([
+    { 环节: '尝试往返(平仓信号)', 笔数: s2Funnel.total, 占比: '100%' },
+    { 环节: '① 四腿全成交(完整)', 笔数: s2Funnel.complete, 占比: `${s2Funnel.completePct}%` },
+    { 环节: '② 开仓成、平仓未全成(持仓卡住)', 笔数: s2Funnel.openBothClosePartial, 占比: `${fpct(s2Funnel.openBothClosePartial)}%` },
+    { 环节: '③ 开仓单腿成(需撤退)', 笔数: s2Funnel.openPartial, 占比: `${fpct(s2Funnel.openPartial)}%` },
+    { 环节: '④ 开仓双腿都未成(未入场)', 笔数: s2Funnel.openNone, 占比: `${fpct(s2Funnel.openNone)}%` },
+  ]);
+  if (s2Funnel.completePct < 30) {
+    console.log(`⚠️ S2 完整成交率 ${s2Funnel.completePct}% < 30% —— 若真实数据仍如此，915bp 那类纸面收益要大打折扣(多数是纸面上填不满的腿)。`);
+  }
+
   mkdirSync('docs/samples', { recursive: true });
   writeFileSync(
     'docs/samples/M2_paper_report.json',
     JSON.stringify(
       {
+        dataSource: process.env.LANDING ?? 'data/live',
         sufficient: tradingDays.length >= cfg.paper.min_trading_days_for_m3,
-        coverage: { utcDays: days.size, tradingDays: tradingDays.length, ticks: replay.events.length, signals: signals.length },
+        coverage: { utcDays: res.utcDays, tradingDays: tradingDays.length, ticks: res.ticks, signals: res.signals },
         notes: [
-          'carry 本期记0（资金费历史待接入 FundingPoller 快照/历史）',
+          'carry=资金费历史(minute_data_v3, %/settle)按持仓期离散结算累计；短持仓(S1/S2分钟级)少跨结算→carry小属正常，S3长持仓才显著',
           'maker 滑点=逆向选择成本(fill-time mid 基准)，非挂价改善；总 PnL 自洽',
           '连续正收益交易日按美股交易日日历计数（无交易/负收益日重置）',
           '真实 S1/S2 进 M3 裁决数字需服务器回流足量真实 tick 后重跑',
         ],
         summaries,
         verdicts,
+        s3Payback: paybackRows,
+        s2Funnel,
       },
       null,
       2,

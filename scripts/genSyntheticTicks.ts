@@ -16,17 +16,20 @@ function rnd(): number {
   return seed / 0x7fffffff;
 }
 
-const BASE: Record<string, number> = { SNDK: 1560, CRCL: 68.7 };
-const SPREAD_BP: Record<string, number> = { bnperp: 0.5, mexcperp: 1.0, gateperp: 1.0 };
-const PRODS = ['bnperp', 'mexcperp', 'gateperp'] as const;
-const SYMS = ['SNDK', 'CRCL'] as const;
+const BASE: Record<string, number> = { SNDK: 1560, CRCL: 68.7, MU: 949 };
+const SPREAD_BP: Record<string, number> = { bnperp: 0.5, mexcperp: 1.0, gateperp: 1.0, bstocks: 4, gstocks: 10 };
+const PRODS = ['bnperp', 'mexcperp', 'gateperp', 'bstocks', 'gstocks'] as const;
+const SYMS = ['SNDK', 'CRCL', 'MU'] as const;
 const TICKS_PER_MIN = 4;
 
 interface MinuteData {
   [sym: string]: { ts0: number; products: Record<string, { d: Array<number | null> }> };
 }
 
-function lagMs(prod: string): number {
+/** 返回该 prod 的事件时间偏移(ms)；bstocks(BN现货)无 ts_exch → null */
+function lagMs(prod: string): number | null {
+  if (prod === 'bstocks') return null; // BN 现货 bookTicker 无事件时间(与真实一致)
+  // 注：gstocks(Gate现货)有事件时间 → 走下方 else 带 lag，与真实 Gate spot.book_ticker.t 一致
   if (prod === 'mexcperp') return Math.round(300 + rnd() * 2900); // 0.3–3.2s
   return Math.round(20 + rnd() * 40); // 20–60ms
 }
@@ -57,7 +60,8 @@ function main(): void {
           const mid = base * (1 + premBp / 1e4);
           const half = (SPREAD_BP[prod]! / 2 / 1e4) * mid;
           const tsRecv = (s.ts0 + i * 60 + k * 15) * 1000;
-          const tsExch = tsRecv - lagMs(prod);
+          const lag = lagMs(prod);
+          const tsExch = lag === null ? null : tsRecv - lag;
           const day = new Date(tsRecv).toISOString().slice(0, 10);
           const key = `${day}|${prod}|${sym}`;
           const arr = buf.get(key) ?? buf.set(key, []).get(key)!;

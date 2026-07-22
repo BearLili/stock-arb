@@ -1,13 +1,14 @@
 {
+  "dataSource": "data/synth_live",
   "sufficient": true,
   "coverage": {
     "utcDays": 8,
     "tradingDays": 6,
-    "ticks": 237464,
-    "signals": 5500
+    "ticks": 554144,
+    "signals": 5536
   },
   "notes": [
-    "carry 本期记0（资金费历史待接入 FundingPoller 快照/历史）",
+    "carry=资金费历史(minute_data_v3, %/settle)按持仓期离散结算累计；短持仓(S1/S2分钟级)少跨结算→carry小属正常，S3长持仓才显著",
     "maker 滑点=逆向选择成本(fill-time mid 基准)，非挂价改善；总 PnL 自洽",
     "连续正收益交易日按美股交易日日历计数（无交易/负收益日重置）",
     "真实 S1/S2 进 M3 裁决数字需服务器回流足量真实 tick 后重跑"
@@ -125,13 +126,13 @@
       "nTrades": 2477,
       "nFilled": 142,
       "captureRatePct": 5.7,
-      "totalBp": 915.12,
-      "avgBpPerTrade": 6.44,
+      "totalBp": 919.08,
+      "avgBpPerTrade": 6.47,
       "pnl": {
         "priceBp": 1575.88,
         "feeBp": -284,
         "slipBp": 944.75,
-        "carryBp": 0
+        "carryBp": 3.96
       },
       "dailyBp": [
         {
@@ -144,7 +145,7 @@
         },
         {
           "day": "2026-07-16",
-          "bp": 253.63
+          "bp": 256.83
         },
         {
           "day": "2026-07-17",
@@ -160,7 +161,7 @@
         },
         {
           "day": "2026-07-20",
-          "bp": 226.86
+          "bp": 227.62
         },
         {
           "day": "2026-07-21",
@@ -178,13 +179,13 @@
       "nTrades": 2477,
       "nFilled": 142,
       "captureRatePct": 5.7,
-      "totalBp": 915.12,
-      "avgBpPerTrade": 6.44,
+      "totalBp": 919.08,
+      "avgBpPerTrade": 6.47,
       "pnl": {
         "priceBp": 1575.88,
         "feeBp": -284,
         "slipBp": 944.75,
-        "carryBp": 0
+        "carryBp": 3.96
       },
       "dailyBp": [
         {
@@ -197,7 +198,7 @@
         },
         {
           "day": "2026-07-16",
-          "bp": 253.63
+          "bp": 256.83
         },
         {
           "day": "2026-07-17",
@@ -213,7 +214,7 @@
         },
         {
           "day": "2026-07-20",
-          "bp": 226.86
+          "bp": 227.62
         },
         {
           "day": "2026-07-21",
@@ -224,6 +225,170 @@
       "makerLegs": 9908,
       "makerFilled": 5699,
       "makerFillRatePct": 57.5
+    },
+    {
+      "strategy": "S3bn",
+      "mode": "naive",
+      "nTrades": 13,
+      "nFilled": 13,
+      "captureRatePct": 100,
+      "totalBp": -477.5,
+      "avgBpPerTrade": -36.73,
+      "pnl": {
+        "priceBp": -37.33,
+        "feeBp": 390,
+        "slipBp": 110.5,
+        "carryBp": 60.33
+      },
+      "dailyBp": [
+        {
+          "day": "2026-07-16",
+          "bp": -121.12
+        },
+        {
+          "day": "2026-07-17",
+          "bp": -68.9
+        },
+        {
+          "day": "2026-07-18",
+          "bp": -38.48
+        },
+        {
+          "day": "2026-07-19",
+          "bp": -47.82
+        },
+        {
+          "day": "2026-07-20",
+          "bp": -106.98
+        },
+        {
+          "day": "2026-07-21",
+          "bp": -94.19
+        }
+      ],
+      "maxConsecPosDays": 0,
+      "makerLegs": 0,
+      "makerFilled": 0,
+      "makerFillRatePct": null
+    },
+    {
+      "strategy": "S3bn",
+      "mode": "corrected",
+      "nTrades": 13,
+      "nFilled": 12,
+      "captureRatePct": 92.3,
+      "totalBp": -436.89,
+      "avgBpPerTrade": -36.41,
+      "pnl": {
+        "priceBp": -35.22,
+        "feeBp": 360,
+        "slipBp": 102,
+        "carryBp": 60.33
+      },
+      "dailyBp": [
+        {
+          "day": "2026-07-16",
+          "bp": -120.15
+        },
+        {
+          "day": "2026-07-17",
+          "bp": -73.71
+        },
+        {
+          "day": "2026-07-18",
+          "bp": -40.55
+        },
+        {
+          "day": "2026-07-19",
+          "bp": -47.76
+        },
+        {
+          "day": "2026-07-20",
+          "bp": -103.83
+        },
+        {
+          "day": "2026-07-21",
+          "bp": -50.9
+        }
+      ],
+      "maxConsecPosDays": 0,
+      "makerLegs": 0,
+      "makerFilled": 0,
+      "makerFillRatePct": null
+    },
+    {
+      "strategy": "S3gate",
+      "mode": "naive",
+      "nTrades": 5,
+      "nFilled": 5,
+      "captureRatePct": 100,
+      "totalBp": -205.87,
+      "avgBpPerTrade": -41.17,
+      "pnl": {
+        "priceBp": 37.51,
+        "feeBp": 275,
+        "slipBp": 75,
+        "carryBp": 106.62
+      },
+      "dailyBp": [
+        {
+          "day": "2026-07-18",
+          "bp": -27.71
+        },
+        {
+          "day": "2026-07-19",
+          "bp": -81.47
+        },
+        {
+          "day": "2026-07-20",
+          "bp": -74.37
+        },
+        {
+          "day": "2026-07-21",
+          "bp": -22.32
+        }
+      ],
+      "maxConsecPosDays": 0,
+      "makerLegs": 0,
+      "makerFilled": 0,
+      "makerFillRatePct": null
+    },
+    {
+      "strategy": "S3gate",
+      "mode": "corrected",
+      "nTrades": 5,
+      "nFilled": 4,
+      "captureRatePct": 80,
+      "totalBp": -171.63,
+      "avgBpPerTrade": -42.91,
+      "pnl": {
+        "priceBp": 27.83,
+        "feeBp": 220,
+        "slipBp": 60,
+        "carryBp": 80.54
+      },
+      "dailyBp": [
+        {
+          "day": "2026-07-18",
+          "bp": -33.37
+        },
+        {
+          "day": "2026-07-19",
+          "bp": -79.84
+        },
+        {
+          "day": "2026-07-20",
+          "bp": -68.39
+        },
+        {
+          "day": "2026-07-21",
+          "bp": 9.98
+        }
+      ],
+      "maxConsecPosDays": 1,
+      "makerLegs": 0,
+      "makerFilled": 0,
+      "makerFillRatePct": null
     }
   ],
   "verdicts": [
@@ -241,8 +406,8 @@
     },
     {
       "strategy": "S2",
-      "correctedTotalBp": 915.12,
-      "naiveTotalBp": 915.12,
+      "correctedTotalBp": 919.08,
+      "naiveTotalBp": 919.08,
       "illusionBp": 0,
       "correctedConsecPosDays": 6,
       "requiredDays": 5,
@@ -250,6 +415,84 @@
       "makerWarning": null,
       "qualifies": true,
       "recommendation": "校正后满足 ≥5 连续正收益交易日 → 建议进 M3"
+    },
+    {
+      "strategy": "S3bn",
+      "correctedTotalBp": -436.89,
+      "naiveTotalBp": -477.5,
+      "illusionBp": -40.61,
+      "correctedConsecPosDays": 0,
+      "requiredDays": 5,
+      "makerFillRatePct": null,
+      "makerWarning": null,
+      "qualifies": false,
+      "recommendation": "数据不足：校正后仅 0 连续正收益交易日 < 5，暂不进 M3"
+    },
+    {
+      "strategy": "S3gate",
+      "correctedTotalBp": -171.63,
+      "naiveTotalBp": -205.87,
+      "illusionBp": -34.24,
+      "correctedConsecPosDays": 1,
+      "requiredDays": 5,
+      "makerFillRatePct": null,
+      "makerWarning": null,
+      "qualifies": false,
+      "recommendation": "数据不足：校正后仅 1 连续正收益交易日 < 5，暂不进 M3"
     }
-  ]
+  ],
+  "s3Payback": [
+    {
+      "变体": "S3bn",
+      "sym": "SNDK",
+      "现货费bp": 10,
+      "日carry_bp": "7.29",
+      "回本天数": "1.4"
+    },
+    {
+      "变体": "S3bn",
+      "sym": "CRCL",
+      "现货费bp": 10,
+      "日carry_bp": "2.62",
+      "回本天数": "3.8"
+    },
+    {
+      "变体": "S3bn",
+      "sym": "MU",
+      "现货费bp": 10,
+      "日carry_bp": "3.66",
+      "回本天数": "2.7"
+    },
+    {
+      "变体": "S3gate",
+      "sym": "SNDK",
+      "现货费bp": 20,
+      "日carry_bp": "9.63",
+      "回本天数": "2.1"
+    },
+    {
+      "变体": "S3gate",
+      "sym": "CRCL",
+      "现货费bp": 20,
+      "日carry_bp": "2.15",
+      "回本天数": "9.3"
+    },
+    {
+      "变体": "S3gate",
+      "sym": "MU",
+      "现货费bp": 20,
+      "日carry_bp": "3.73",
+      "回本天数": "5.4"
+    }
+  ],
+  "s2Funnel": {
+    "strategy": "S2",
+    "mode": "corrected",
+    "total": 2477,
+    "complete": 142,
+    "openBothClosePartial": 360,
+    "openPartial": 1681,
+    "openNone": 294,
+    "completePct": 5.7
+  }
 }

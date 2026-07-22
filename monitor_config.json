@@ -43,7 +43,11 @@
     "exit_band_bp": 2,
     "maker_timeout_ms": 60000,
     "max_hold_min": 240,
-    "min_trading_days_for_m3": 5
+    "min_trading_days_for_m3": 5,
+    "maker_offset_bp": 0,
+    "s3_entry_carry_bp_day": 2,
+    "s3_exit_carry_bp_day": 0.5,
+    "s3_max_hold_days": 30
   },
   "alert_csv": "alerts.csv",
   "funding_note": "持仓对需叠加资金费差(近7天日均%): SNDK bn .073/gate .096/mexc .073/hl .062; MU bn .037/gate .037/hl .051; CRCL bn .026/gate .022/mexc .026/hl .050",
@@ -56,7 +60,8 @@
     ["okxx", "bnperp"],
     ["bybitx", "xstocks"],
     ["mexcon", "bnperp"],
-    ["bstocks", "bnperp"]
+    ["bstocks", "bnperp"],
+    ["gstocks", "gateperp"]
   ],
   "symbols": {
     "TSLA":  {"bnperp": "TSLAUSDT", "gateperp": "TSLAX_USDT", "hlperp": "xyz:TSLA", "bstocks": "TSLABUSDT", "gstocks": "TSLAG_USDT", "xstocks": "TSLAX_USDT", "bybitx": "TSLAXUSDT", "okxx": "XTSLA-USDT", "mexcon": "TSLAONUSDT"},

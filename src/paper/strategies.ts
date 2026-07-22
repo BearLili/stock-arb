@@ -7,7 +7,7 @@
 import type { Config } from '../config.js';
 import type { Prod } from '../types.js';
 import type { PairEval } from '../engine/netEdge.js';
-import type { Strategy, TradeSignal, OrderType, Leg } from './types.js';
+import type { Strategy, TradeSignal, OrderType, Leg, FundingLookup } from './types.js';
 
 interface PosState {
   posId: string;
@@ -87,12 +87,97 @@ export class MeanRevStrategy implements Strategy {
     }
     return [];
   }
+
+  forceClose(ts: number): TradeSignal[] {
+    const out: TradeSignal[] = [];
+    for (const [sym, st] of this.pos) {
+      // 若头寸在 eodTs 之后才开仓，平仓 ts 不得早于开仓 ts（防负持仓/carry窗口反转，审计M1）
+      const closeTs = Math.max(ts, st.tsOpen);
+      out.push({ posId: st.posId, strategy: this.name, sym, pair: this.pairKey, ts: closeTs, action: 'close', legs: this.legs(st.dir, 'close'), refDiffBp: 0, reason: 'forced_eod' });
+    }
+    this.pos.clear();
+    return out;
+  }
 }
 
-/** 构造首发策略集：S1(taker) + S2(maker)。 */
-export function buildStrategies(cfg: Config): MeanRevStrategy[] {
+/**
+ * S3 carry-hold：现货多 + 永续空，收永续资金费。
+ * 入场：永续日化资金费(bp/天) > 入场阈值 → 买现货、卖永续；
+ * 平仓：资金费 < 退出阈值 或 超最长持仓天数 或 数据结束(forceClose)。
+ * 现货腿费率一次性(BN 10bp/Gate 20bp)，永续腿 taker；carry 由 portfolio 按结算累计。
+ */
+export class CarryHoldStrategy implements Strategy {
+  readonly name: string;
+  private readonly spot: Prod;
+  private readonly perp: Prod;
+  private readonly syms: Set<string>;
+  private readonly pairKey: string;
+  private seq = 0;
+  private readonly pos = new Map<string, { posId: string; tsOpen: number }>();
+
+  constructor(
+    opts: { name: string; spot: Prod; perp: Prod; syms: string[] },
+    private readonly cfg: Config,
+    private readonly fundingAt: FundingLookup,
+  ) {
+    this.name = opts.name;
+    this.spot = opts.spot;
+    this.perp = opts.perp;
+    this.syms = new Set(opts.syms);
+    this.pairKey = `${opts.spot}-${opts.perp}`;
+    if (!cfg.tradeable(opts.spot) || !cfg.tradeable(opts.perp)) this.syms = new Set();
+  }
+
+  private legs(action: 'open' | 'close'): Leg[] {
+    // 开：买现货 + 卖永续；平：反向
+    const buySpot = action === 'open';
+    return [
+      { prod: this.spot, side: buySpot ? 'buy' : 'sell', type: 'taker' },
+      { prod: this.perp, side: buySpot ? 'sell' : 'buy', type: 'taker' },
+    ];
+  }
+
+  onEval(ev: PairEval): TradeSignal[] {
+    if (ev.pair !== this.pairKey || !this.syms.has(ev.sym)) return [];
+    const fBpDay = this.fundingAt(ev.sym, this.perp, ev.ts);
+    if (fBpDay === null) return [];
+    const st = this.pos.get(ev.sym);
+    const p = this.cfg.paper;
+    if (!st) {
+      if (fBpDay > p.s3_entry_carry_bp_day) {
+        this.seq += 1;
+        const posId = `${this.name}-${ev.sym}-${this.seq}`;
+        this.pos.set(ev.sym, { posId, tsOpen: ev.ts });
+        return [{ posId, strategy: this.name, sym: ev.sym, pair: this.pairKey, ts: ev.ts, action: 'open', legs: this.legs('open'), refDiffBp: ev.diffBp, reason: `funding=${fBpDay.toFixed(2)}bp/日>入场` }];
+      }
+      return [];
+    }
+    const heldDays = (ev.ts - st.tsOpen) / 86400000;
+    if (fBpDay < p.s3_exit_carry_bp_day || heldDays > p.s3_max_hold_days) {
+      this.pos.delete(ev.sym);
+      const reason = fBpDay < p.s3_exit_carry_bp_day ? 'funding衰减' : 'max_hold';
+      return [{ posId: st.posId, strategy: this.name, sym: ev.sym, pair: this.pairKey, ts: ev.ts, action: 'close', legs: this.legs('close'), refDiffBp: ev.diffBp, reason }];
+    }
+    return [];
+  }
+
+  forceClose(ts: number): TradeSignal[] {
+    const out: TradeSignal[] = [];
+    for (const [sym, st] of this.pos) {
+      const closeTs = Math.max(ts, st.tsOpen); // 防负持仓（审计M1）
+      out.push({ posId: st.posId, strategy: this.name, sym, pair: this.pairKey, ts: closeTs, action: 'close', legs: this.legs('close'), refDiffBp: 0, reason: 'forced_eod' });
+    }
+    this.pos.clear();
+    return out;
+  }
+}
+
+/** 构造首发策略集：S1(taker均值回归) + S2(maker基差) + S3(现货多永续空carry)两变体。 */
+export function buildStrategies(cfg: Config, fundingAt: FundingLookup): Strategy[] {
   return [
     new MeanRevStrategy({ name: 'S1', a: 'bnperp', b: 'mexcperp', syms: ['SNDK', 'CRCL'], legType: 'taker' }, cfg),
     new MeanRevStrategy({ name: 'S2', a: 'gateperp', b: 'mexcperp', syms: ['SNDK'], legType: 'maker' }, cfg),
+    new CarryHoldStrategy({ name: 'S3bn', spot: 'bstocks', perp: 'bnperp', syms: ['SNDK', 'CRCL', 'MU'] }, cfg, fundingAt),
+    new CarryHoldStrategy({ name: 'S3gate', spot: 'gstocks', perp: 'gateperp', syms: ['SNDK', 'CRCL', 'MU'] }, cfg, fundingAt),
   ];
 }

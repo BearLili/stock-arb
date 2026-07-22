@@ -1,0 +1,62 @@
+/**
+ * 纸面撮合流水线（paperRun 与 sweep 共用）：
+ *   replay 事件流(ts_recv视图) → 引擎驱动策略收集信号 → 两口径撮合 → 交易集。
+ */
+import type { Config } from '../config.js';
+import type { Replay } from './replay.js';
+import type { FundingHistory } from './fundingHistory.js';
+import { NetEdgeEngine } from '../engine/netEdge.js';
+import { silentSink } from '../engine/alerts.js';
+import { buildStrategies } from './strategies.js';
+import { runBook, type CarryFn } from './portfolio.js';
+import { tradingDaysCalendar } from './report.js';
+import type { Trade, TradeSignal } from './types.js';
+
+export interface PaperResult {
+  strats: string[];
+  signals: number;
+  naiveTrades: Trade[];
+  correctedTrades: Trade[];
+  tradingDays: string[];
+  utcDays: number;
+  ticks: number;
+}
+
+export function runPaperPipeline(cfg: Config, replay: Replay, fh: FundingHistory): PaperResult {
+  const carry: CarryFn = (sym, prod, dir, tsOpen, tsClose) => fh.legCarryBp(sym, prod, dir, tsOpen, tsClose);
+  const strategies = buildStrategies(cfg, (sym, prod, ts) => fh.dailyBpAt(sym, prod, ts));
+  const strats = [...new Set(strategies.map((s) => s.name))];
+
+  const signals: TradeSignal[] = [];
+  let clock = 0;
+  const engine = new NetEdgeEngine({
+    cfg,
+    alerts: silentSink,
+    now: () => clock,
+    onEval: (ev) => {
+      for (const s of strategies) signals.push(...s.onEval(ev));
+    },
+  });
+  for (const e of replay.events) {
+    clock = e.tsRecv;
+    engine.onBbo(e);
+  }
+  const eodTs = Math.max(replay.events[0]!.tsRecv, replay.events[replay.events.length - 1]!.tsRecv - 10000);
+  for (const s of strategies) signals.push(...s.forceClose(eodTs));
+
+  const naive = runBook(signals, replay, cfg, 'naive', carry);
+  const corrected = runBook(signals, replay, cfg, 'corrected', carry);
+
+  const days = new Set(replay.events.map((e) => new Date(e.tsRecv).toISOString().slice(0, 10)));
+  const tradingDays = tradingDaysCalendar(replay.events[0]!.tsRecv, replay.events[replay.events.length - 1]!.tsRecv);
+
+  return {
+    strats,
+    signals: signals.length,
+    naiveTrades: naive.trades,
+    correctedTrades: corrected.trades,
+    tradingDays,
+    utcDays: days.size,
+    ticks: replay.events.length,
+  };
+}

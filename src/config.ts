@@ -47,6 +47,12 @@ const paperSchema = z
     maker_timeout_ms: z.number().int().default(60000),
     max_hold_min: z.number().int().default(240),
     min_trading_days_for_m3: z.number().int().default(5),
+    // maker 挂单偏移(bp)：正=更激进(向mid内挂,成交率↑价差↓)，0=挂在bbo。扫描维度。
+    maker_offset_bp: z.number().default(0),
+    // S3 carry-hold（现货多+永续空）：入/出场按永续日化资金费(bp/天)阈值 + 最长持仓天数
+    s3_entry_carry_bp_day: z.number().default(2),
+    s3_exit_carry_bp_day: z.number().default(0.5),
+    s3_max_hold_days: z.number().default(30),
   })
   .default({});
 
@@ -95,6 +101,14 @@ export class Config {
       throw new Error(`配置校验失败 ${path}:\n${parsed.error.toString()}`);
     }
     return new Config(parsed.data, path);
+  }
+
+  /** 返回覆盖了部分 engine/paper 参数的新 Config（参数扫描用；不改原对象） */
+  override(patch: { engine?: Partial<EngineParams>; paper?: Partial<PaperParams> }): Config {
+    const raw = structuredClone(this.raw);
+    if (patch.engine) Object.assign(raw.engine, patch.engine);
+    if (patch.paper) Object.assign(raw.paper, patch.paper);
+    return new Config(raw, this.path);
   }
 
   /** 语义级校验：pair 两腿必须是已知产品键；至少一个 symbol 提供该产品 */

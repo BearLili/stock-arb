@@ -35,10 +35,11 @@ export function simulateFill(replay: Replay, cfg: Config, sym: string, leg: Leg,
     };
   }
 
-  // maker：挂决策时看到的同侧 bbo 价 P
+  // maker：挂决策时看到的同侧 bbo 价 P（偏移 maker_offset_bp：正=向 mid 内更激进）
   const seen = replay.quoteAt(sym, prod, tDecision);
   if (!seen) return base;
-  const postPrice = side === 'buy' ? seen.bid : seen.ask;
+  const off = cfg.paper.maker_offset_bp / 1e4;
+  const postPrice = side === 'buy' ? seen.bid * (1 + off) : seen.ask * (1 - off);
   const cross = replay.firstCross(sym, prod, arrival, side, postPrice, cfg.paper.maker_timeout_ms);
   if (!cross) {
     // 未成交（挂单超时撤单）

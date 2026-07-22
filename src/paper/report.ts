@@ -97,6 +97,43 @@ export function summarize(strategy: string, mode: FillMode, all: Trade[], tradin
   };
 }
 
+export interface Funnel {
+  strategy: string;
+  mode: FillMode;
+  total: number; // 平仓信号总数(=尝试的往返)
+  complete: number; // 四腿全成交
+  openBothClosePartial: number; // 开仓双腿成交、平仓未全成 → 持仓卡住(平仓腿未穿越)
+  openPartial: number; // 开仓仅单腿成交 → 需撤退单腿
+  openNone: number; // 开仓双腿都未成交 → 未入场(对侧未穿越挂价)
+  completePct: number;
+}
+
+/**
+ * 意图→成交漏斗分解（S2 用；maker 未穿越导致的流失分类）。
+ * 注：本层非成交全部源于 maker 对侧价在 maker_timeout_ms 内未穿越挂价（"超时放弃"）；
+ *    新鲜度门是告警侧(paper 用 silentSink)，不影响撮合，故此处不涉及。
+ */
+export function funnel(strategy: string, mode: FillMode, all: Trade[]): Funnel {
+  const trades = all.filter((t) => t.strategy === strategy);
+  let complete = 0;
+  let openBothClosePartial = 0;
+  let openPartial = 0;
+  let openNone = 0;
+  for (const t of trades) {
+    const openN = t.openLegs.filter((l) => l.filled).length;
+    const closeN = t.closeLegs.filter((l) => l.filled).length;
+    if (openN === 2 && closeN === 2) complete += 1;
+    else if (openN === 2) openBothClosePartial += 1;
+    else if (openN === 1) openPartial += 1;
+    else openNone += 1;
+  }
+  const total = trades.length;
+  return {
+    strategy, mode, total, complete, openBothClosePartial, openPartial, openNone,
+    completePct: total ? Number(((complete / total) * 100).toFixed(1)) : 0,
+  };
+}
+
 export interface M3Verdict {
   strategy: string;
   correctedTotalBp: number;

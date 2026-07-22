@@ -3,12 +3,16 @@
  * 模拟成交、配对开/平、算 4 项归因 PnL、统计 maker 成交率。
  */
 import type { Config } from '../config.js';
+import type { Prod } from '../types.js';
 import type { Replay } from './replay.js';
 import type { FillMode, FilledLeg, Trade, TradeSignal, PnlBreakdown } from './types.js';
 import { simulateFill } from './fill.js';
 
-/** 资金费 carry 提供者：某 (sym,prod) 日化资金费(bp)；无则 null → carry 记 0 */
-export type CarryFn = (sym: string, prod: string) => number | null;
+/**
+ * 资金费 carry 提供者：返回某腿在 [tsOpen,tsClose] 持仓期的 carry(bp)。
+ * dir:+1多/−1空；内部按离散结算累计、已含多付空收符号；现货腿返回 0。
+ */
+export type CarryFn = (sym: string, prod: Prod, dir: 1 | -1, tsOpenMs: number, tsCloseMs: number) => number;
 
 interface OpenCtx {
   sig: TradeSignal;
@@ -73,20 +77,18 @@ export function runBook(
     let pnl: PnlBreakdown = { priceBp: 0, feeBp: 0, slipBp: 0, carryBp: 0, totalBp: 0 };
     let note = '';
     if (filledOk) {
-      const holdDays = holdMin / 1440;
       for (const openLeg of oc.legs) {
         const closeLeg = closeLegs.find((c) => c.prod === openLeg.prod);
         if (!closeLeg) continue;
-        const dir = openLeg.side === 'buy' ? 1 : -1;
+        const dir: 1 | -1 = openLeg.side === 'buy' ? 1 : -1;
         const openMid = openLeg.midAtFill!;
         const closeMid = closeLeg.midAtFill!;
         if (!(openMid > 0)) continue; // 防脏数据除零
         pnl.priceBp += ((closeMid - openMid) / openMid) * 1e4 * dir;
         pnl.slipBp += slipBp(openLeg) + slipBp(closeLeg);
         pnl.feeBp += openLeg.feeBp + closeLeg.feeBp;
-        // 持仓资金费：多头付、空头收 → carry_leg = −dir × dailyBp × holdDays
-        const daily = carry(oc.sig.sym, openLeg.prod);
-        if (daily !== null) pnl.carryBp += -dir * daily * holdDays;
+        // 持仓资金费：按持仓期内离散结算累计（多付空收符号已在 carry 内处理）
+        pnl.carryBp += carry(oc.sig.sym, openLeg.prod, dir, oc.sig.ts, sig.ts);
       }
       pnl.totalBp = pnl.priceBp - pnl.slipBp - pnl.feeBp + pnl.carryBp;
     } else {

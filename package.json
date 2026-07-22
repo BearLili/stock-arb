@@ -16,6 +16,7 @@
     "health": "tsx scripts/healthcheck.ts",
     "paper": "tsx scripts/paperRun.ts",
     "test:paper": "tsx scripts/testPaper.ts",
+    "sweep": "tsx scripts/sweep.ts",
     "measure:rtt": "tsx scripts/measureRtt.ts"
   },
   "dependencies": {

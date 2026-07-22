@@ -54,7 +54,12 @@ export interface Strategy {
   readonly name: string;
   /** 引擎每次 pair 求值回调 → 策略产出开/平仓信号（可空） */
   onEval(ev: import('../engine/netEdge.js').PairEval): TradeSignal[];
+  /** 数据结束时强制平掉未平仓头寸（carry-hold 尤其需要）；ts 应留出 rtt 余量 */
+  forceClose(ts: number): TradeSignal[];
 }
+
+/** 时点日化资金费查询(bp/天)；无则 null */
+export type FundingLookup = (sym: string, prod: Prod, tsMs: number) => number | null;
 
 /** PnL 四项归因（bp of notional） */
 export interface PnlBreakdown {
