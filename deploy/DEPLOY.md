@@ -52,7 +52,14 @@ journalctl -u stock-arb-collector -f
 # crontab -e
 */5 * * * * cd /opt/stock-arb && /usr/bin/npx tsx scripts/healthcheck.ts >> logs/health.log 2>&1 || echo "$(date -u) UNHEALTHY" >> logs/health.alert
 ```
-`npm run health` 读最近完整率报表，任一 feed 在线率 <95% 或报表过旧则退出码 1。
+`npm run health` 读最近完整率报表，任一 feed 在线率 <95% / 磁盘 <5GB / 报表过旧则退出码 1。
+> 报表过旧阈值默认 = max(180, 3×REPORT_EVERY)；若采集器用非默认 `REPORT_EVERY`，health 侧同环境即可对齐（如本地 300s 报表需 `REPORT_EVERY=300`）。
+
+每日完整率快照进 RUNLOG（留存"数据时钟起算+完整率>99%"的逐日裁决证据）：
+```bash
+# crontab：每日 UTC 00:05 追加一行到 data/live/RUNLOG.jsonl
+5 0 * * * cd /opt/stock-arb && /usr/bin/npx tsx scripts/runlog.ts >> logs/runlog.cron.log 2>&1
+```
 
 ## 5. 磁盘与轮转
 - 落盘量级：~2–5 万行/分钟合计（gz 后每日约数十–数百 MB，视行情活跃度）。跨 UTC 日自动 gzip。

@@ -50,15 +50,36 @@ export function runBook(
   let makerAttempted = 0;
   let makerFilled = 0;
 
-  const fillLegs = (sig: TradeSignal): FilledLeg[] =>
-    sig.legs.map((leg) => {
-      const fl = simulateFill(replay, cfg, sig.sym, leg, sig.ts, mode);
-      if (leg.type === 'maker') {
+  const unfilled = (leg: TradeSignal['legs'][number], ts: number): FilledLeg => ({
+    prod: leg.prod, side: leg.side, type: leg.type, filled: false, tsDecision: ts, tsFill: null, fillPrice: null, midAtFill: null, feeBp: 0,
+  });
+
+  const fillLegs = (sig: TradeSignal): FilledLeg[] => {
+    let filled: FilledLeg[];
+    const hedgeIdx = sig.legs.findIndex((l) => l.role === 'hedge');
+    const pIdx = sig.legs.findIndex((l) => l.role === 'primary');
+    if (hedgeIdx < 0 || pIdx < 0) {
+      // v1：两腿独立成交（或畸形信号缺 primary/hedge → 退化为独立，防越界）
+      filled = sig.legs.map((leg) => simulateFill(replay, cfg, sig.sym, leg, sig.ts, mode));
+    } else {
+      // v2 应急对冲：先 primary(maker)，成交后 hedge(taker) 于 primary 成交时刻下单；primary 不成交则不建腿
+      filled = new Array<FilledLeg>(sig.legs.length);
+      const prim = simulateFill(replay, cfg, sig.sym, sig.legs[pIdx]!, sig.ts, mode);
+      filled[pIdx] = prim;
+      filled[hedgeIdx] =
+        prim.filled && prim.tsFill !== null
+          ? simulateFill(replay, cfg, sig.sym, sig.legs[hedgeIdx]!, prim.tsFill, mode)
+          : unfilled(sig.legs[hedgeIdx]!, sig.ts);
+    }
+    // maker 腿计数
+    for (let i = 0; i < sig.legs.length; i += 1) {
+      if (sig.legs[i]!.type === 'maker') {
         makerAttempted += 1;
-        if (fl.filled) makerFilled += 1;
+        if (filled[i]!.filled) makerFilled += 1;
       }
-      return fl;
-    });
+    }
+    return filled;
+  };
 
   for (const sig of signals) {
     if (sig.action === 'open') {

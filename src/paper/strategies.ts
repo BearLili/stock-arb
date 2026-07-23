@@ -20,17 +20,24 @@ export class MeanRevStrategy implements Strategy {
   private readonly a: Prod;
   private readonly b: Prod;
   private readonly syms: Set<string>;
-  private readonly legType: OrderType;
+  private readonly aType: OrderType;
+  private readonly bType: OrderType;
+  private readonly contingent: boolean; // v2：a=primary(maker), b=hedge(taker)，b 仅在 a 成交后下
   private readonly pairKey: string;
   private seq = 0;
   private readonly pos = new Map<string, PosState>(); // key: sym
 
-  constructor(opts: { name: string; a: Prod; b: Prod; syms: string[]; legType: OrderType }, private readonly cfg: Config) {
+  constructor(
+    opts: { name: string; a: Prod; b: Prod; syms: string[]; aType: OrderType; bType: OrderType; contingent?: boolean },
+    private readonly cfg: Config,
+  ) {
     this.name = opts.name;
     this.a = opts.a;
     this.b = opts.b;
     this.syms = new Set(opts.syms);
-    this.legType = opts.legType;
+    this.aType = opts.aType;
+    this.bType = opts.bType;
+    this.contingent = opts.contingent ?? false;
     this.pairKey = `${opts.a}-${opts.b}`;
     // tradeable 双保险：任一腿不可交易则该策略不产信号
     if (!cfg.tradeable(opts.a) || !cfg.tradeable(opts.b)) {
@@ -40,20 +47,29 @@ export class MeanRevStrategy implements Strategy {
 
   private entryThresholdBp(ev: PairEval): number {
     const mult = this.cfg.paper.entry_cost_mult;
-    if (this.legType === 'taker') {
-      // 全taker往返成本（用实时点差）
-      return this.cfg.roundTripTakerCostBp(this.a, this.b, ev.spreadABp + ev.spreadBBp) * mult;
+    if (this.aType === 'taker' && this.bType === 'taker') {
+      return this.cfg.roundTripTakerCostBp(this.a, this.b, ev.spreadABp + ev.spreadBBp) * mult; // v1 全taker
     }
-    return this.cfg.makerThresholdBp(this.a, this.b) * mult;
+    if (this.aType === 'maker' && this.bType === 'maker') {
+      return this.cfg.makerThresholdBp(this.a, this.b) * mult; // v1 全maker
+    }
+    // 混合(v2)：往返费=2×(该腿对应费)，仅 taker 腿穿点差；+最低利润项
+    const feeA = this.aType === 'taker' ? this.cfg.takerFeeBp(this.a) : this.cfg.makerFeeBp(this.a);
+    const feeB = this.bType === 'taker' ? this.cfg.takerFeeBp(this.b) : this.cfg.makerFeeBp(this.b);
+    const takerSpread = (this.aType === 'taker' ? ev.spreadABp : 0) + (this.bType === 'taker' ? ev.spreadBBp : 0);
+    return (Math.max(2 * (feeA + feeB), 0) + this.cfg.makerMinProfitBp + takerSpread) * mult;
   }
 
   private legs(dir: 1 | -1, action: 'open' | 'close'): Leg[] {
     // 开仓 dir=+1：卖a买b；平仓则反向
     const sellA = action === 'open' ? dir === 1 : dir !== 1;
-    return [
-      { prod: this.a, side: sellA ? 'sell' : 'buy', type: this.legType },
-      { prod: this.b, side: sellA ? 'buy' : 'sell', type: this.legType },
-    ];
+    const legA: Leg = { prod: this.a, side: sellA ? 'sell' : 'buy', type: this.aType };
+    const legB: Leg = { prod: this.b, side: sellA ? 'buy' : 'sell', type: this.bType };
+    if (this.contingent) {
+      legA.role = 'primary'; // maker 挂单
+      legB.role = 'hedge'; // 成交后即时 taker 对冲
+    }
+    return [legA, legB];
   }
 
   onEval(ev: PairEval): TradeSignal[] {
@@ -172,11 +188,19 @@ export class CarryHoldStrategy implements Strategy {
   }
 }
 
-/** 构造首发策略集：S1(taker均值回归) + S2(maker基差) + S3(现货多永续空carry)两变体。 */
+/**
+ * 构造首发策略集（六变体）：
+ *   S1(双taker) / S1v2(BN maker→MEXC taker对冲)
+ *   S2(双maker) / S2v2(Gate maker→MEXC taker对冲)
+ *   S3bn / S3gate(现货多永续空carry)
+ * v2：MEXC taker 0费必成交，单边只在 Gate/BN 挂 maker 吃返佣，成交瞬间 taker 对冲 → 消除单腿风险。
+ */
 export function buildStrategies(cfg: Config, fundingAt: FundingLookup): Strategy[] {
   return [
-    new MeanRevStrategy({ name: 'S1', a: 'bnperp', b: 'mexcperp', syms: ['SNDK', 'CRCL'], legType: 'taker' }, cfg),
-    new MeanRevStrategy({ name: 'S2', a: 'gateperp', b: 'mexcperp', syms: ['SNDK'], legType: 'maker' }, cfg),
+    new MeanRevStrategy({ name: 'S1', a: 'bnperp', b: 'mexcperp', syms: ['SNDK', 'CRCL'], aType: 'taker', bType: 'taker' }, cfg),
+    new MeanRevStrategy({ name: 'S1v2', a: 'bnperp', b: 'mexcperp', syms: ['SNDK', 'CRCL'], aType: 'maker', bType: 'taker', contingent: true }, cfg),
+    new MeanRevStrategy({ name: 'S2', a: 'gateperp', b: 'mexcperp', syms: ['SNDK'], aType: 'maker', bType: 'maker' }, cfg),
+    new MeanRevStrategy({ name: 'S2v2', a: 'gateperp', b: 'mexcperp', syms: ['SNDK'], aType: 'maker', bType: 'taker', contingent: true }, cfg),
     new CarryHoldStrategy({ name: 'S3bn', spot: 'bstocks', perp: 'bnperp', syms: ['SNDK', 'CRCL', 'MU'] }, cfg, fundingAt),
     new CarryHoldStrategy({ name: 'S3gate', spot: 'gstocks', perp: 'gateperp', syms: ['SNDK', 'CRCL', 'MU'] }, cfg, fundingAt),
   ];

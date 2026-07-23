@@ -14,11 +14,12 @@ export interface Quote {
   tsRecv: number;
 }
 
-/** 一条腿的下单意图 */
+/** 一条腿的下单意图。role 用于 v2 应急对冲：hedge 腿仅在 primary 成交后按其成交时刻下单 */
 export interface Leg {
   prod: Prod;
   side: Side;
   type: OrderType;
+  role?: 'primary' | 'hedge';
 }
 
 /** 一个开/平仓信号（含两腿） */

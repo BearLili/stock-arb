@@ -4,11 +4,25 @@
  * 用法：npx tsx scripts/healthcheck.ts   （或 pm2/systemd 侧挂 cron）
  * 环境：MIN_UPTIME_PCT(默认95)、MAX_REPORT_AGE_SEC(默认180)
  */
-import { readFileSync } from 'node:fs';
+import { readFileSync, statfsSync } from 'node:fs';
 
 const MIN_UPTIME = Number(process.env.MIN_UPTIME_PCT ?? 95);
-const MAX_AGE_SEC = Number(process.env.MAX_REPORT_AGE_SEC ?? 180);
+// 报表每 REPORT_EVERY 刷新，正常最大年龄=该间隔。阈值默认 = max(180, 3×REPORT_EVERY)：
+// 与采集器同读 REPORT_EVERY（30s→180s 灵敏，300s→900s 不误报）；真卡死年龄无上限仍被抓。
+const REPORT_EVERY = Number(process.env.REPORT_EVERY ?? 60);
+const MAX_AGE_SEC = Number(process.env.MAX_REPORT_AGE_SEC ?? Math.max(180, 3 * REPORT_EVERY));
+const MIN_FREE_GB = Number(process.env.MIN_FREE_GB ?? 5);
 const path = process.env.HEALTH_REPORT ?? 'data/live/completeness-latest.json';
+
+/** 落盘目录可用空间(GB)；取不到返回 null */
+function freeGB(dir = 'data'): number | null {
+  try {
+    const s = statfsSync(dir);
+    return (Number(s.bavail) * Number(s.bsize)) / 1e9;
+  } catch {
+    return null;
+  }
+}
 
 interface Feed {
   name: string;
@@ -29,6 +43,10 @@ function main(): void {
     process.exit(1);
   }
   const problems: string[] = [];
+  const free = freeGB();
+  if (free !== null && free < MIN_FREE_GB) {
+    problems.push(`磁盘余量 ${free.toFixed(1)}GB < ${MIN_FREE_GB}GB（落盘将受阻）`);
+  }
   if (!Number.isFinite(rep.reportTs)) {
     problems.push('报表缺 reportTs（格式异常）');
   } else {
@@ -51,7 +69,7 @@ function main(): void {
     process.exit(1);
   }
   const ageSec = Number.isFinite(rep.reportTs) ? (Date.now() - rep.reportTs) / 1000 : NaN;
-  console.log(`HEALTHY: ${rep.feeds.length} feeds，报表 ${ageSec.toFixed(0)}s 前，全部在线率 ≥${MIN_UPTIME}%`);
+  console.log(`HEALTHY: ${rep.feeds.length} feeds，报表 ${ageSec.toFixed(0)}s 前，全部在线率 ≥${MIN_UPTIME}%，磁盘余量 ${free === null ? 'n/a' : free.toFixed(1) + 'GB'}`);
   process.exit(0);
 }
 

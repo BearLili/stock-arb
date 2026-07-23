@@ -76,18 +76,21 @@ function main(): void {
   console.table(paybackRows);
 
   // S2 意图→成交漏斗（maker 未穿越流失分解）
-  const s2Funnel = funnel('S2', 'corrected', correctedTrades);
-  const fpct = (n: number): string => (s2Funnel.total ? ((n / s2Funnel.total) * 100).toFixed(1) : '0');
-  console.log('\n[S2 意图→成交漏斗] 非成交全部源于 maker 对侧价超时(maker_timeout_ms)未穿越挂价:');
-  console.table([
-    { 环节: '尝试往返(平仓信号)', 笔数: s2Funnel.total, 占比: '100%' },
-    { 环节: '① 四腿全成交(完整)', 笔数: s2Funnel.complete, 占比: `${s2Funnel.completePct}%` },
-    { 环节: '② 开仓成、平仓未全成(持仓卡住)', 笔数: s2Funnel.openBothClosePartial, 占比: `${fpct(s2Funnel.openBothClosePartial)}%` },
-    { 环节: '③ 开仓单腿成(需撤退)', 笔数: s2Funnel.openPartial, 占比: `${fpct(s2Funnel.openPartial)}%` },
-    { 环节: '④ 开仓双腿都未成(未入场)', 笔数: s2Funnel.openNone, 占比: `${fpct(s2Funnel.openNone)}%` },
-  ]);
-  if (s2Funnel.completePct < 30) {
-    console.log(`⚠️ S2 完整成交率 ${s2Funnel.completePct}% < 30% —— 若真实数据仍如此，915bp 那类纸面收益要大打折扣(多数是纸面上填不满的腿)。`);
+  // v1 vs v2 成交漏斗对比（v2 应急对冲预期消除"开仓单腿"这一环）
+  console.log('\n[成交漏斗 v1 vs v2] 非成交源于 maker 对侧超时未穿越；v2 hedge 腿仅在 primary 成交后下 → 无单腿:');
+  const funnelRows: Array<Record<string, unknown>> = [];
+  for (const s of STRATS.filter((n) => n === 'S2' || n === 'S2v2')) {
+    const f = funnel(s, 'corrected', correctedTrades);
+    const pc = (n: number): string => (f.total ? `${((n / f.total) * 100).toFixed(1)}%` : '0');
+    funnelRows.push({
+      策略: s, 尝试: f.total, 完整成交: f.complete, 完整率: `${f.completePct}%`,
+      '②平仓卡住': pc(f.openBothClosePartial), '③开仓单腿(需撤退)': pc(f.openPartial), '④未入场': pc(f.openNone),
+    });
+  }
+  console.table(funnelRows);
+  const s2v2 = funnel('S2v2', 'corrected', correctedTrades);
+  if (s2v2.total > 0) {
+    console.log(`→ S2v2 单腿(需撤退)占比 = ${s2v2.total ? ((s2v2.openPartial / s2v2.total) * 100).toFixed(1) : '0'}%（应≈0，应急对冲设计）；完整成交率 ${s2v2.completePct}% vs S2 ${funnel('S2', 'corrected', correctedTrades).completePct}%`);
   }
 
   mkdirSync('docs/samples', { recursive: true });
@@ -107,7 +110,7 @@ function main(): void {
         summaries,
         verdicts,
         s3Payback: paybackRows,
-        s2Funnel,
+        funnels: { S2: funnel('S2', 'corrected', correctedTrades), S2v2: funnel('S2v2', 'corrected', correctedTrades), S1v2: funnel('S1v2', 'corrected', correctedTrades) },
       },
       null,
       2,
