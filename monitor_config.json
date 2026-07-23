@@ -49,6 +49,16 @@
     "s3_exit_carry_bp_day": 0.5,
     "s3_max_hold_days": 30
   },
+  "_risk说明": "M3 风控闸门阈值(初始值,开发文档§6)。daily_loss_halt_usd=日均预期盈利×3占位;emergency_unwind_daily_limit=同策略日内EMERGENCY_UNWIND达此次数自动暂停(v2唯一亏损路径自刹车)",
+  "risk": {
+    "max_notional_usd": 500,
+    "max_strategy_exposure_usd": 20000,
+    "max_total_exposure_usd": 50000,
+    "daily_loss_halt_usd": 1000,
+    "api_error_rate_per_min": 5,
+    "emergency_unwind_daily_limit": 3,
+    "clock_skew_reject_ms": 500
+  },
   "alert_csv": "alerts.csv",
   "funding_note": "持仓对需叠加资金费差(近7天日均%): SNDK bn .073/gate .096/mexc .073/hl .062; MU bn .037/gate .037/hl .051; CRCL bn .026/gate .022/mexc .026/hl .050",
   "pairs": [

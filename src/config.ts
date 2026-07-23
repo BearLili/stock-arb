@@ -56,9 +56,22 @@ const paperSchema = z
   })
   .default({});
 
+const riskSchema = z
+  .object({
+    max_notional_usd: z.number().default(500),
+    max_strategy_exposure_usd: z.number().default(20000),
+    max_total_exposure_usd: z.number().default(50000),
+    daily_loss_halt_usd: z.number().default(1000),
+    api_error_rate_per_min: z.number().default(5),
+    emergency_unwind_daily_limit: z.number().int().default(3),
+    clock_skew_reject_ms: z.number().int().default(500),
+  })
+  .default({});
+
 export type EngineParams = z.infer<typeof engineSchema>;
 export type FundingPollParams = z.infer<typeof fundingPollSchema>;
 export type PaperParams = z.infer<typeof paperSchema>;
+export type RiskParams = z.infer<typeof riskSchema>;
 
 const configSchema = z
   .object({
@@ -73,6 +86,7 @@ const configSchema = z
     tradeable: z.record(z.string(), z.boolean()).default({}),
     rtt_ms: z.record(z.string(), z.number()).default({}),
     paper: paperSchema,
+    risk: riskSchema,
     alert_csv: z.string().default('alerts.csv'),
     funding_note: z.string().optional(),
     pairs: z.array(pairSchema),
@@ -103,11 +117,12 @@ export class Config {
     return new Config(parsed.data, path);
   }
 
-  /** 返回覆盖了部分 engine/paper 参数的新 Config（参数扫描用；不改原对象） */
-  override(patch: { engine?: Partial<EngineParams>; paper?: Partial<PaperParams> }): Config {
+  /** 返回覆盖了部分 engine/paper/risk 参数的新 Config（扫描/测试用；不改原对象） */
+  override(patch: { engine?: Partial<EngineParams>; paper?: Partial<PaperParams>; risk?: Partial<RiskParams> }): Config {
     const raw = structuredClone(this.raw);
     if (patch.engine) Object.assign(raw.engine, patch.engine);
     if (patch.paper) Object.assign(raw.paper, patch.paper);
+    if (patch.risk) Object.assign(raw.risk, patch.risk);
     return new Config(raw, this.path);
   }
 
@@ -165,6 +180,10 @@ export class Config {
 
   get paper(): PaperParams {
     return this.raw.paper;
+  }
+
+  get risk(): RiskParams {
+    return this.raw.risk;
   }
 
   /** 该产品是否允许作交易腿（撮合层双保险）；缺省 true */
