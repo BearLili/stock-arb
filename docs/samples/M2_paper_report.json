@@ -5,7 +5,7 @@
     "utcDays": 8,
     "tradingDays": 6,
     "ticks": 554144,
-    "signals": 11140
+    "signals": 13464
   },
   "notes": [
     "carry=资金费历史(minute_data_v3, %/settle)按持仓期离散结算累计；短持仓(S1/S2分钟级)少跨结算→carry小属正常，S3长持仓才显著",
@@ -17,49 +17,49 @@
     {
       "strategy": "S1",
       "mode": "naive",
-      "nTrades": 273,
-      "nFilled": 273,
+      "nTrades": 397,
+      "nFilled": 397,
       "captureRatePct": 100,
-      "totalBp": -689.4,
-      "avgBpPerTrade": -2.53,
+      "totalBp": -1124.44,
+      "avgBpPerTrade": -2.83,
       "pnl": {
-        "priceBp": 3542.1,
-        "feeBp": 2730,
-        "slipBp": 1501.5,
+        "priceBp": 4481.2,
+        "feeBp": 3970,
+        "slipBp": 1635.64,
         "carryBp": 0
       },
       "dailyBp": [
         {
           "day": "2026-07-14",
-          "bp": -12.36
+          "bp": -25.65
         },
         {
           "day": "2026-07-15",
-          "bp": -76.75
+          "bp": -199.96
         },
         {
           "day": "2026-07-16",
-          "bp": -136.83
+          "bp": -224.85
         },
         {
           "day": "2026-07-17",
-          "bp": -203.96
+          "bp": -266.02
         },
         {
           "day": "2026-07-18",
-          "bp": -5.63
+          "bp": -9.7
         },
         {
           "day": "2026-07-19",
-          "bp": -89.61
+          "bp": -116.21
         },
         {
           "day": "2026-07-20",
-          "bp": -131.91
+          "bp": -227.9
         },
         {
           "day": "2026-07-21",
-          "bp": -32.35
+          "bp": -54.15
         }
       ],
       "maxConsecPosDays": 0,
@@ -70,52 +70,52 @@
     {
       "strategy": "S1",
       "mode": "corrected",
-      "nTrades": 273,
-      "nFilled": 273,
+      "nTrades": 397,
+      "nFilled": 397,
       "captureRatePct": 100,
-      "totalBp": -257.18,
-      "avgBpPerTrade": -0.94,
+      "totalBp": -283.02,
+      "avgBpPerTrade": -0.71,
       "pnl": {
-        "priceBp": 3974.32,
-        "feeBp": 2730,
-        "slipBp": 1501.5,
+        "priceBp": 5322.62,
+        "feeBp": 3970,
+        "slipBp": 1635.64,
         "carryBp": 0
       },
       "dailyBp": [
         {
           "day": "2026-07-14",
-          "bp": -22.46
+          "bp": -15.86
         },
         {
           "day": "2026-07-15",
-          "bp": 0.88
+          "bp": -55.96
         },
         {
           "day": "2026-07-16",
-          "bp": -29.39
+          "bp": -71.25
         },
         {
           "day": "2026-07-17",
-          "bp": -110.57
+          "bp": -66.11
         },
         {
           "day": "2026-07-18",
-          "bp": -6.86
+          "bp": -10.92
         },
         {
           "day": "2026-07-19",
-          "bp": -25.5
+          "bp": -22.97
         },
         {
           "day": "2026-07-20",
-          "bp": -42.38
+          "bp": -4.49
         },
         {
           "day": "2026-07-21",
-          "bp": -20.91
+          "bp": -35.47
         }
       ],
-      "maxConsecPosDays": 1,
+      "maxConsecPosDays": 0,
       "makerLegs": 0,
       "makerFilled": 0,
       "makerFillRatePct": null
@@ -123,320 +123,320 @@
     {
       "strategy": "S1v2",
       "mode": "naive",
-      "nTrades": 1018,
-      "nFilled": 342,
-      "captureRatePct": 33.6,
-      "totalBp": 604.56,
-      "avgBpPerTrade": 1.77,
+      "nTrades": 1420,
+      "nFilled": 550,
+      "captureRatePct": 38.7,
+      "totalBp": 707.81,
+      "avgBpPerTrade": 1.29,
       "pnl": {
-        "priceBp": 4518.08,
-        "feeBp": 1368,
-        "slipBp": 2545.53,
+        "priceBp": 6321.86,
+        "feeBp": 2200,
+        "slipBp": 3414.05,
         "carryBp": 0
       },
       "dailyBp": [
         {
           "day": "2026-07-14",
-          "bp": 6.7
+          "bp": 12.46
         },
         {
           "day": "2026-07-15",
-          "bp": 92.43
+          "bp": 111.78
         },
         {
           "day": "2026-07-16",
-          "bp": 135.26
+          "bp": 145.93
         },
         {
           "day": "2026-07-17",
-          "bp": 143.69
+          "bp": 195.74
         },
         {
           "day": "2026-07-18",
-          "bp": 2.27
+          "bp": 5.48
         },
         {
           "day": "2026-07-19",
-          "bp": 52.81
+          "bp": 64.67
         },
         {
           "day": "2026-07-20",
-          "bp": 159.38
+          "bp": 143.76
         },
         {
           "day": "2026-07-21",
-          "bp": 12.01
+          "bp": 27.99
         }
       ],
       "maxConsecPosDays": 6,
-      "makerLegs": 2036,
-      "makerFilled": 1217,
-      "makerFillRatePct": 59.8
+      "makerLegs": 2840,
+      "makerFilled": 1852,
+      "makerFillRatePct": 65.2
     },
     {
       "strategy": "S1v2",
       "mode": "corrected",
-      "nTrades": 1018,
-      "nFilled": 342,
-      "captureRatePct": 33.6,
-      "totalBp": -611.56,
-      "avgBpPerTrade": -1.79,
+      "nTrades": 1420,
+      "nFilled": 550,
+      "captureRatePct": 38.7,
+      "totalBp": -1020.27,
+      "avgBpPerTrade": -1.86,
       "pnl": {
-        "priceBp": 3301.97,
-        "feeBp": 1368,
-        "slipBp": 2545.53,
+        "priceBp": 4593.78,
+        "feeBp": 2200,
+        "slipBp": 3414.05,
         "carryBp": 0
       },
       "dailyBp": [
         {
           "day": "2026-07-14",
-          "bp": -24.33
+          "bp": -44.01
         },
         {
           "day": "2026-07-15",
-          "bp": -107.59
+          "bp": -156.37
         },
         {
           "day": "2026-07-16",
-          "bp": -112.56
+          "bp": -286.58
         },
         {
           "day": "2026-07-17",
-          "bp": -177.39
+          "bp": -195.27
         },
         {
           "day": "2026-07-18",
-          "bp": -23.15
+          "bp": -65.81
         },
         {
           "day": "2026-07-19",
-          "bp": -171.69
+          "bp": -220.96
         },
         {
           "day": "2026-07-20",
-          "bp": 47.77
+          "bp": 3.53
         },
         {
           "day": "2026-07-21",
-          "bp": -42.6
+          "bp": -54.8
         }
       ],
       "maxConsecPosDays": 1,
-      "makerLegs": 2036,
-      "makerFilled": 1217,
-      "makerFillRatePct": 59.8
+      "makerLegs": 2840,
+      "makerFilled": 1852,
+      "makerFillRatePct": 65.2
     },
     {
       "strategy": "S2",
       "mode": "naive",
       "nTrades": 2477,
-      "nFilled": 142,
-      "captureRatePct": 5.7,
-      "totalBp": 919.08,
-      "avgBpPerTrade": 6.47,
+      "nFilled": 288,
+      "captureRatePct": 11.6,
+      "totalBp": 1378.64,
+      "avgBpPerTrade": 4.79,
       "pnl": {
-        "priceBp": 1575.88,
-        "feeBp": -284,
-        "slipBp": 944.75,
-        "carryBp": 3.96
+        "priceBp": 2395.48,
+        "feeBp": -576,
+        "slipBp": 1597.27,
+        "carryBp": 4.43
       },
       "dailyBp": [
         {
           "day": "2026-07-14",
-          "bp": 48.15
+          "bp": 79.85
         },
         {
           "day": "2026-07-15",
-          "bp": 86.16
+          "bp": 189.42
         },
         {
           "day": "2026-07-16",
-          "bp": 256.83
+          "bp": 332.05
         },
         {
           "day": "2026-07-17",
-          "bp": 196.32
+          "bp": 255.94
         },
         {
           "day": "2026-07-18",
-          "bp": 11.68
+          "bp": 57.16
         },
         {
           "day": "2026-07-19",
-          "bp": 22.14
+          "bp": 42.41
         },
         {
           "day": "2026-07-20",
-          "bp": 227.62
+          "bp": 330.92
         },
         {
           "day": "2026-07-21",
-          "bp": 70.18
+          "bp": 90.88
         }
       ],
       "maxConsecPosDays": 6,
       "makerLegs": 9908,
-      "makerFilled": 5699,
-      "makerFillRatePct": 57.5
+      "makerFilled": 6414,
+      "makerFillRatePct": 64.7
     },
     {
       "strategy": "S2",
       "mode": "corrected",
       "nTrades": 2477,
-      "nFilled": 142,
-      "captureRatePct": 5.7,
-      "totalBp": 919.08,
-      "avgBpPerTrade": 6.47,
+      "nFilled": 288,
+      "captureRatePct": 11.6,
+      "totalBp": 1378.64,
+      "avgBpPerTrade": 4.79,
       "pnl": {
-        "priceBp": 1575.88,
-        "feeBp": -284,
-        "slipBp": 944.75,
-        "carryBp": 3.96
+        "priceBp": 2395.48,
+        "feeBp": -576,
+        "slipBp": 1597.27,
+        "carryBp": 4.43
       },
       "dailyBp": [
         {
           "day": "2026-07-14",
-          "bp": 48.15
+          "bp": 79.85
         },
         {
           "day": "2026-07-15",
-          "bp": 86.16
+          "bp": 189.42
         },
         {
           "day": "2026-07-16",
-          "bp": 256.83
+          "bp": 332.05
         },
         {
           "day": "2026-07-17",
-          "bp": 196.32
+          "bp": 255.94
         },
         {
           "day": "2026-07-18",
-          "bp": 11.68
+          "bp": 57.16
         },
         {
           "day": "2026-07-19",
-          "bp": 22.14
+          "bp": 42.41
         },
         {
           "day": "2026-07-20",
-          "bp": 227.62
+          "bp": 330.92
         },
         {
           "day": "2026-07-21",
-          "bp": 70.18
+          "bp": 90.88
         }
       ],
       "maxConsecPosDays": 6,
       "makerLegs": 9908,
-      "makerFilled": 5699,
-      "makerFillRatePct": 57.5
+      "makerFilled": 6414,
+      "makerFillRatePct": 64.7
     },
     {
       "strategy": "S2v2",
       "mode": "naive",
-      "nTrades": 1784,
-      "nFilled": 588,
-      "captureRatePct": 33,
-      "totalBp": 1989.65,
-      "avgBpPerTrade": 3.38,
+      "nTrades": 2420,
+      "nFilled": 861,
+      "captureRatePct": 35.6,
+      "totalBp": 2623.7,
+      "avgBpPerTrade": 3.05,
       "pnl": {
-        "priceBp": 4867.08,
-        "feeBp": -1176,
-        "slipBp": 4058.12,
-        "carryBp": 4.7
+        "priceBp": 5768.61,
+        "feeBp": -1722,
+        "slipBp": 4874.93,
+        "carryBp": 8.02
       },
       "dailyBp": [
         {
           "day": "2026-07-14",
-          "bp": 94.94
+          "bp": 109.25
         },
         {
           "day": "2026-07-15",
-          "bp": 281.47
+          "bp": 376.63
         },
         {
           "day": "2026-07-16",
-          "bp": 445
+          "bp": 543.81
         },
         {
           "day": "2026-07-17",
-          "bp": 367.82
+          "bp": 467.18
         },
         {
           "day": "2026-07-18",
-          "bp": 54.72
+          "bp": 127.62
         },
         {
           "day": "2026-07-19",
-          "bp": 178.72
+          "bp": 241.99
         },
         {
           "day": "2026-07-20",
-          "bp": 459.22
+          "bp": 586.62
         },
         {
           "day": "2026-07-21",
-          "bp": 107.75
+          "bp": 170.6
         }
       ],
       "maxConsecPosDays": 6,
-      "makerLegs": 3568,
-      "makerFilled": 2106,
-      "makerFillRatePct": 59
+      "makerLegs": 4840,
+      "makerFilled": 3039,
+      "makerFillRatePct": 62.8
     },
     {
       "strategy": "S2v2",
       "mode": "corrected",
-      "nTrades": 1784,
-      "nFilled": 588,
-      "captureRatePct": 33,
-      "totalBp": -215.18,
-      "avgBpPerTrade": -0.37,
+      "nTrades": 2420,
+      "nFilled": 861,
+      "captureRatePct": 35.6,
+      "totalBp": -85.18,
+      "avgBpPerTrade": -0.1,
       "pnl": {
-        "priceBp": 2662.24,
-        "feeBp": -1176,
-        "slipBp": 4058.12,
-        "carryBp": 4.7
+        "priceBp": 3059.73,
+        "feeBp": -1722,
+        "slipBp": 4874.93,
+        "carryBp": 8.02
       },
       "dailyBp": [
         {
           "day": "2026-07-14",
-          "bp": 47.02
+          "bp": 59.38
         },
         {
           "day": "2026-07-15",
-          "bp": -93.27
+          "bp": -81.93
         },
         {
           "day": "2026-07-16",
-          "bp": 38.04
+          "bp": 91.84
         },
         {
           "day": "2026-07-17",
-          "bp": -115.39
+          "bp": -9.63
         },
         {
           "day": "2026-07-18",
-          "bp": -55.33
+          "bp": -76.45
         },
         {
           "day": "2026-07-19",
-          "bp": -186.45
+          "bp": -223.49
         },
         {
           "day": "2026-07-20",
-          "bp": 192.53
+          "bp": 200.76
         },
         {
           "day": "2026-07-21",
-          "bp": -42.34
+          "bp": -45.67
         }
       ],
       "maxConsecPosDays": 1,
-      "makerLegs": 3568,
-      "makerFilled": 2106,
-      "makerFillRatePct": 59
+      "makerLegs": 4840,
+      "makerFilled": 3039,
+      "makerFillRatePct": 62.8
     },
     {
       "strategy": "S3bn",
@@ -444,38 +444,38 @@
       "nTrades": 13,
       "nFilled": 13,
       "captureRatePct": 100,
-      "totalBp": -477.5,
-      "avgBpPerTrade": -36.73,
+      "totalBp": -469.83,
+      "avgBpPerTrade": -36.14,
       "pnl": {
         "priceBp": -37.33,
         "feeBp": 390,
-        "slipBp": 110.5,
+        "slipBp": 102.83,
         "carryBp": 60.33
       },
       "dailyBp": [
         {
           "day": "2026-07-16",
-          "bp": -121.12
+          "bp": -119.35
         },
         {
           "day": "2026-07-17",
-          "bp": -68.9
+          "bp": -67.13
         },
         {
           "day": "2026-07-18",
-          "bp": -38.48
+          "bp": -37.89
         },
         {
           "day": "2026-07-19",
-          "bp": -47.82
+          "bp": -47.23
         },
         {
           "day": "2026-07-20",
-          "bp": -106.98
+          "bp": -105.21
         },
         {
           "day": "2026-07-21",
-          "bp": -94.19
+          "bp": -93.01
         }
       ],
       "maxConsecPosDays": 0,
@@ -489,38 +489,38 @@
       "nTrades": 13,
       "nFilled": 12,
       "captureRatePct": 92.3,
-      "totalBp": -436.89,
-      "avgBpPerTrade": -36.41,
+      "totalBp": -429.81,
+      "avgBpPerTrade": -35.82,
       "pnl": {
         "priceBp": -35.22,
         "feeBp": 360,
-        "slipBp": 102,
+        "slipBp": 94.92,
         "carryBp": 60.33
       },
       "dailyBp": [
         {
           "day": "2026-07-16",
-          "bp": -120.15
+          "bp": -118.38
         },
         {
           "day": "2026-07-17",
-          "bp": -73.71
+          "bp": -71.94
         },
         {
           "day": "2026-07-18",
-          "bp": -40.55
+          "bp": -39.96
         },
         {
           "day": "2026-07-19",
-          "bp": -47.76
+          "bp": -47.17
         },
         {
           "day": "2026-07-20",
-          "bp": -103.83
+          "bp": -102.06
         },
         {
           "day": "2026-07-21",
-          "bp": -50.9
+          "bp": -50.31
         }
       ],
       "maxConsecPosDays": 0,
@@ -534,30 +534,30 @@
       "nTrades": 5,
       "nFilled": 5,
       "captureRatePct": 100,
-      "totalBp": -205.87,
-      "avgBpPerTrade": -41.17,
+      "totalBp": -223.97,
+      "avgBpPerTrade": -44.79,
       "pnl": {
         "priceBp": 37.51,
         "feeBp": 275,
-        "slipBp": 75,
+        "slipBp": 93.1,
         "carryBp": 106.62
       },
       "dailyBp": [
         {
           "day": "2026-07-18",
-          "bp": -27.71
+          "bp": -31.33
         },
         {
           "day": "2026-07-19",
-          "bp": -81.47
+          "bp": -85.09
         },
         {
           "day": "2026-07-20",
-          "bp": -74.37
+          "bp": -77.99
         },
         {
           "day": "2026-07-21",
-          "bp": -22.32
+          "bp": -29.56
         }
       ],
       "maxConsecPosDays": 0,
@@ -571,30 +571,30 @@
       "nTrades": 5,
       "nFilled": 4,
       "captureRatePct": 80,
-      "totalBp": -171.63,
-      "avgBpPerTrade": -42.91,
+      "totalBp": -186.11,
+      "avgBpPerTrade": -46.53,
       "pnl": {
         "priceBp": 27.83,
         "feeBp": 220,
-        "slipBp": 60,
+        "slipBp": 74.48,
         "carryBp": 80.54
       },
       "dailyBp": [
         {
           "day": "2026-07-18",
-          "bp": -33.37
+          "bp": -36.99
         },
         {
           "day": "2026-07-19",
-          "bp": -79.84
+          "bp": -83.46
         },
         {
           "day": "2026-07-20",
-          "bp": -68.39
+          "bp": -72.01
         },
         {
           "day": "2026-07-21",
-          "bp": 9.98
+          "bp": 6.36
         }
       ],
       "maxConsecPosDays": 1,
@@ -606,57 +606,57 @@
   "verdicts": [
     {
       "strategy": "S1",
-      "correctedTotalBp": -257.18,
-      "naiveTotalBp": -689.4,
-      "illusionBp": -432.22,
-      "correctedConsecPosDays": 1,
+      "correctedTotalBp": -283.02,
+      "naiveTotalBp": -1124.44,
+      "illusionBp": -841.42,
+      "correctedConsecPosDays": 0,
       "requiredDays": 5,
       "makerFillRatePct": null,
       "makerWarning": null,
       "qualifies": false,
-      "recommendation": "数据不足：校正后仅 1 连续正收益交易日 < 5，暂不进 M3"
+      "recommendation": "数据不足：校正后仅 0 连续正收益交易日 < 5，暂不进 M3"
     },
     {
       "strategy": "S1v2",
-      "correctedTotalBp": -611.56,
-      "naiveTotalBp": 604.56,
-      "illusionBp": 1216.12,
+      "correctedTotalBp": -1020.27,
+      "naiveTotalBp": 707.81,
+      "illusionBp": 1728.08,
       "correctedConsecPosDays": 1,
       "requiredDays": 5,
-      "makerFillRatePct": 59.8,
+      "makerFillRatePct": 65.2,
       "makerWarning": null,
       "qualifies": false,
       "recommendation": "数据不足：校正后仅 1 连续正收益交易日 < 5，暂不进 M3"
     },
     {
       "strategy": "S2",
-      "correctedTotalBp": 919.08,
-      "naiveTotalBp": 919.08,
+      "correctedTotalBp": 1378.64,
+      "naiveTotalBp": 1378.64,
       "illusionBp": 0,
       "correctedConsecPosDays": 6,
       "requiredDays": 5,
-      "makerFillRatePct": 57.5,
+      "makerFillRatePct": 64.7,
       "makerWarning": null,
       "qualifies": true,
       "recommendation": "校正后满足 ≥5 连续正收益交易日 → 建议进 M3"
     },
     {
       "strategy": "S2v2",
-      "correctedTotalBp": -215.18,
-      "naiveTotalBp": 1989.65,
-      "illusionBp": 2204.83,
+      "correctedTotalBp": -85.18,
+      "naiveTotalBp": 2623.7,
+      "illusionBp": 2708.88,
       "correctedConsecPosDays": 1,
       "requiredDays": 5,
-      "makerFillRatePct": 59,
+      "makerFillRatePct": 62.8,
       "makerWarning": null,
       "qualifies": false,
       "recommendation": "数据不足：校正后仅 1 连续正收益交易日 < 5，暂不进 M3"
     },
     {
       "strategy": "S3bn",
-      "correctedTotalBp": -436.89,
-      "naiveTotalBp": -477.5,
-      "illusionBp": -40.61,
+      "correctedTotalBp": -429.81,
+      "naiveTotalBp": -469.83,
+      "illusionBp": -40.02,
       "correctedConsecPosDays": 0,
       "requiredDays": 5,
       "makerFillRatePct": null,
@@ -666,9 +666,9 @@
     },
     {
       "strategy": "S3gate",
-      "correctedTotalBp": -171.63,
-      "naiveTotalBp": -205.87,
-      "illusionBp": -34.24,
+      "correctedTotalBp": -186.11,
+      "naiveTotalBp": -223.97,
+      "illusionBp": -37.86,
       "correctedConsecPosDays": 1,
       "requiredDays": 5,
       "makerFillRatePct": null,
@@ -721,36 +721,168 @@
       "回本天数": "5.4"
     }
   ],
+  "reachability": [
+    {
+      "sym": "SNDK",
+      "pair": "bnperp-gateperp",
+      "nSegments": 1,
+      "oppPct": 0.02,
+      "medianDurMs": 105000,
+      "p95DurMs": 105000,
+      "totalDelayMs": 140,
+      "reachablePct": 100
+    },
+    {
+      "sym": "MU",
+      "pair": "bnperp-gateperp",
+      "nSegments": 1,
+      "oppPct": 0.01,
+      "medianDurMs": 45000,
+      "p95DurMs": 45000,
+      "totalDelayMs": 140,
+      "reachablePct": 100
+    },
+    {
+      "sym": "CRCL",
+      "pair": "bnperp-gateperp",
+      "nSegments": 1,
+      "oppPct": 0,
+      "medianDurMs": 15000,
+      "p95DurMs": 15000,
+      "totalDelayMs": 140,
+      "reachablePct": 100
+    },
+    {
+      "sym": "MU",
+      "pair": "bstocks-bnperp",
+      "nSegments": 0,
+      "oppPct": 0,
+      "medianDurMs": null,
+      "p95DurMs": null,
+      "totalDelayMs": 140,
+      "reachablePct": null
+    },
+    {
+      "sym": "SNDK",
+      "pair": "bstocks-bnperp",
+      "nSegments": 0,
+      "oppPct": 0,
+      "medianDurMs": null,
+      "p95DurMs": null,
+      "totalDelayMs": 140,
+      "reachablePct": null
+    },
+    {
+      "sym": "CRCL",
+      "pair": "bstocks-bnperp",
+      "nSegments": 2,
+      "oppPct": 0.01,
+      "medianDurMs": 22500,
+      "p95DurMs": 30000,
+      "totalDelayMs": 140,
+      "reachablePct": 100
+    },
+    {
+      "sym": "MU",
+      "pair": "gstocks-gateperp",
+      "nSegments": 2,
+      "oppPct": 0.02,
+      "medianDurMs": 52500,
+      "p95DurMs": 75000,
+      "totalDelayMs": 140,
+      "reachablePct": 100
+    },
+    {
+      "sym": "SNDK",
+      "pair": "gstocks-gateperp",
+      "nSegments": 9,
+      "oppPct": 0.06,
+      "medianDurMs": 30000,
+      "p95DurMs": 120000,
+      "totalDelayMs": 140,
+      "reachablePct": 100
+    },
+    {
+      "sym": "CRCL",
+      "pair": "gstocks-gateperp",
+      "nSegments": 4,
+      "oppPct": 0.02,
+      "medianDurMs": 22500,
+      "p95DurMs": 45000,
+      "totalDelayMs": 140,
+      "reachablePct": 100
+    },
+    {
+      "sym": "SNDK",
+      "pair": "bnperp-mexcperp",
+      "nSegments": 240,
+      "oppPct": 1.48,
+      "medianDurMs": 30000,
+      "p95DurMs": 90000,
+      "totalDelayMs": 2065,
+      "reachablePct": 100
+    },
+    {
+      "sym": "SNDK",
+      "pair": "gateperp-mexcperp",
+      "nSegments": 141,
+      "oppPct": 1.83,
+      "medianDurMs": 45000,
+      "p95DurMs": 195000,
+      "totalDelayMs": 2065,
+      "reachablePct": 100
+    },
+    {
+      "sym": "CRCL",
+      "pair": "bnperp-mexcperp",
+      "nSegments": 171,
+      "oppPct": 1.12,
+      "medianDurMs": 30000,
+      "p95DurMs": 90000,
+      "totalDelayMs": 2065,
+      "reachablePct": 100
+    },
+    {
+      "sym": "CRCL",
+      "pair": "gateperp-mexcperp",
+      "nSegments": 47,
+      "oppPct": 0.24,
+      "medianDurMs": 15000,
+      "p95DurMs": 90000,
+      "totalDelayMs": 2065,
+      "reachablePct": 100
+    }
+  ],
   "funnels": {
     "S2": {
       "strategy": "S2",
       "mode": "corrected",
       "total": 2477,
-      "complete": 142,
-      "openBothClosePartial": 360,
-      "openPartial": 1681,
-      "openNone": 294,
-      "completePct": 5.7
+      "complete": 288,
+      "openBothClosePartial": 467,
+      "openPartial": 1535,
+      "openNone": 187,
+      "completePct": 11.6
     },
     "S2v2": {
       "strategy": "S2v2",
       "mode": "corrected",
-      "total": 1784,
-      "complete": 588,
-      "openBothClosePartial": 397,
+      "total": 2420,
+      "complete": 861,
+      "openBothClosePartial": 579,
       "openPartial": 0,
-      "openNone": 799,
-      "completePct": 33
+      "openNone": 980,
+      "completePct": 35.6
     },
     "S1v2": {
       "strategy": "S1v2",
       "mode": "corrected",
-      "total": 1018,
-      "complete": 342,
-      "openBothClosePartial": 171,
+      "total": 1420,
+      "complete": 550,
+      "openBothClosePartial": 254,
       "openPartial": 0,
-      "openNone": 505,
-      "completePct": 33.6
+      "openNone": 616,
+      "completePct": 38.7
     }
   }
 }

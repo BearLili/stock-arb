@@ -10,6 +10,8 @@ import { silentSink } from '../engine/alerts.js';
 import { buildStrategies } from './strategies.js';
 import { runBook, type CarryFn } from './portfolio.js';
 import { tradingDaysCalendar } from './report.js';
+import { median } from '../engine/baseline.js';
+import { ReachabilityTracker, type ReachRow } from './reachability.js';
 import type { Trade, TradeSignal } from './types.js';
 
 export interface PaperResult {
@@ -20,12 +22,26 @@ export interface PaperResult {
   tradingDays: string[];
   utcDays: number;
   ticks: number;
+  reachRows: ReachRow[];
+}
+
+/** 各 prod 实测数据滞后中位(ms, ts_recv−ts_exch)。 */
+function lagByProd(replay: Replay): Map<string, number> {
+  const acc = new Map<string, number[]>();
+  for (const e of replay.events) {
+    if (e.tsExch === null) continue;
+    (acc.get(e.prod) ?? acc.set(e.prod, []).get(e.prod)!).push(e.tsRecv - e.tsExch);
+  }
+  const out = new Map<string, number>();
+  for (const [prod, arr] of acc) out.set(prod, median(arr) ?? 0);
+  return out;
 }
 
 export function runPaperPipeline(cfg: Config, replay: Replay, fh: FundingHistory): PaperResult {
   const carry: CarryFn = (sym, prod, dir, tsOpen, tsClose) => fh.legCarryBp(sym, prod, dir, tsOpen, tsClose);
   const strategies = buildStrategies(cfg, (sym, prod, ts) => fh.dailyBpAt(sym, prod, ts));
   const strats = [...new Set(strategies.map((s) => s.name))];
+  const reach = new ReachabilityTracker(cfg);
 
   const signals: TradeSignal[] = [];
   let clock = 0;
@@ -34,6 +50,7 @@ export function runPaperPipeline(cfg: Config, replay: Replay, fh: FundingHistory
     alerts: silentSink,
     now: () => clock,
     onEval: (ev) => {
+      reach.observe(ev);
       for (const s of strategies) signals.push(...s.onEval(ev));
     },
   });
@@ -58,5 +75,6 @@ export function runPaperPipeline(cfg: Config, replay: Replay, fh: FundingHistory
     tradingDays,
     utcDays: days.size,
     ticks: replay.events.length,
+    reachRows: reach.rows(lagByProd(replay)),
   };
 }

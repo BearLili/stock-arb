@@ -88,6 +88,21 @@ function main(): void {
     });
   }
   console.table(funnelRows);
+  // 可达性：机会段时长 vs 总延迟(rtt+滞后)——比 PnL 更解释 taker 类为何抓不到
+  console.log('\n[可达性] 机会段(|dev|>全taker成本)时长 vs 总延迟(慢腿滞后+两腿rtt)；段时长<总延迟=不可达:');
+  console.table(
+    res.reachRows
+      .filter((r) => r.pair.includes('mexcperp') || r.pair.includes('hlperp'))
+      .sort((a, b) => (b.oppPct - a.oppPct))
+      .slice(0, 12)
+      .map((r) => ({
+        sym: r.sym, pair: r.pair, 机会段数: r.nSegments, 机会占比: `${r.oppPct}%`,
+        段中位ms: r.medianDurMs, 段p95ms: r.p95DurMs, 总延迟ms: r.totalDelayMs,
+        可达段占比: r.reachablePct === null ? '—' : `${r.reachablePct}%`,
+      })),
+  );
+  console.log('→ taker 类：可达段占比低 = 大部分机会你还没下到单就关闭了（延迟>段时长），这解释了为何 S1 抓不到；maker 类(挂单等成交)不受此限。');
+
   const s2v2 = funnel('S2v2', 'corrected', correctedTrades);
   if (s2v2.total > 0) {
     console.log(`→ S2v2 单腿(需撤退)占比 = ${s2v2.total ? ((s2v2.openPartial / s2v2.total) * 100).toFixed(1) : '0'}%（应≈0，应急对冲设计）；完整成交率 ${s2v2.completePct}% vs S2 ${funnel('S2', 'corrected', correctedTrades).completePct}%`);
@@ -110,6 +125,7 @@ function main(): void {
         summaries,
         verdicts,
         s3Payback: paybackRows,
+        reachability: res.reachRows,
         funnels: { S2: funnel('S2', 'corrected', correctedTrades), S2v2: funnel('S2v2', 'corrected', correctedTrades), S1v2: funnel('S1v2', 'corrected', correctedTrades) },
       },
       null,

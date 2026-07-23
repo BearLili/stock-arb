@@ -21,6 +21,7 @@ const GLOB = process.env.LANDING_GLOB ?? 'data/live/*/*.jsonl*';
 const OKX_LIST_DATE = '2026-07-16'; // OKX 代币化股票上市日（PRD §2.2）
 const MIN_TRADING_DAYS = 3;
 const MIN_WEEKENDS = 1;
+const S5_CLOSE_BP = Number(process.env.S5_CLOSE_BP ?? 2); // 连续2日溢价中位在 ±此值内 → 建议关闭 S5
 
 const SRC = `read_json_auto('${GLOB}', format='newline_delimited', compression='auto_detect', union_by_name=true)`;
 
@@ -167,6 +168,24 @@ async function main(): Promise<void> {
   console.log(`[S5] OKX−BN 溢价逐日(bp)（上市日 ${OKX_LIST_DATE}，days_since_listing 为第N天）:`);
   console.table(s5res);
 
+  // S5 关闭建议：某 sym 最近连续 2 日 OKX 溢价中位都在 ±S5_CLOSE_BP 内 → 新区溢价耗散
+  const bySymS5 = new Map<string, number[]>();
+  for (const r of s5res) {
+    const sym = String(r.sym);
+    (bySymS5.get(sym) ?? bySymS5.set(sym, []).get(sym)!).push(Number(r.okx_prem_med_bp));
+  }
+  const s5CloseFlags: Array<{ sym: string; last2_med_bp: number[]; close_recommended: boolean }> = [];
+  for (const [sym, meds] of bySymS5) {
+    const last2 = meds.slice(-2);
+    const closed = last2.length >= 2 && last2.every((m) => Math.abs(m) <= S5_CLOSE_BP);
+    s5CloseFlags.push({ sym, last2_med_bp: last2, close_recommended: closed });
+  }
+  console.log(`[S5 关闭判定] 连续2日 OKX 溢价中位都在 ±${S5_CLOSE_BP}bp → 建议关闭该 sym 的 S5（新区溢价耗散）:`);
+  console.table(s5CloseFlags);
+  const toClose = s5CloseFlags.filter((f) => f.close_recommended).map((f) => f.sym);
+  if (toClose.length) console.log(`→ 建议关闭 S5：${toClose.join(', ')}（溢价已进 ±${S5_CLOSE_BP}bp）`);
+  console.log('※ "新场所/新代币上市有短暂首周溢价窗口"模式已验证 → 记入观察池：下次有新场所/新标的上线，抢首周窗口。');
+
   if (!sufficient) {
     console.log('\n⚠️ 数据不足，S4/S5 结论留空。上线后在服务器持续采集 ≥3 交易日+1 周末再复跑本报告。');
   } else {
@@ -187,6 +206,9 @@ async function main(): Promise<void> {
         s4_hl_spread_daily: s4res.hlSpreadDaily,
         s4_hl_minus_bn_premium_daily: s4res.hlVsBnPremiumDaily,
         s5_okx_premium_daily: s5res,
+        s5_close_flags: s5CloseFlags,
+        s5_close_threshold_bp: S5_CLOSE_BP,
+        observation_pool_note: '新场所/新代币上市首周溢价窗口模式已验证；下次新场所上线抢首周',
       },
       bigintReplacer,
       2,

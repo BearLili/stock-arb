@@ -17,7 +17,8 @@ function rnd(): number {
 }
 
 const BASE: Record<string, number> = { SNDK: 1560, CRCL: 68.7, MU: 949 };
-const SPREAD_BP: Record<string, number> = { bnperp: 0.5, mexcperp: 1.0, gateperp: 1.0, bstocks: 4, gstocks: 10 };
+// 点差校准自 book_snap 实测（SNDK）：mexcperp 0.06bp(Boss实测)、bnperp 0.06、gateperp 0.71、bstocks 3.85、gstocks 13.91
+const SPREAD_BP: Record<string, number> = { bnperp: 0.06, mexcperp: 0.06, gateperp: 0.71, bstocks: 3.85, gstocks: 13.91 };
 const PRODS = ['bnperp', 'mexcperp', 'gateperp', 'bstocks', 'gstocks'] as const;
 const SYMS = ['SNDK', 'CRCL', 'MU'] as const;
 const TICKS_PER_MIN = 4;
